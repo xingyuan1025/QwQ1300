@@ -1,0 +1,917 @@
+-- 全局变量
+local player = game.Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local holding, target, holdDistance, anchoredWhileHolding = false, nil, 10, false
+
+local run, UIS = game:GetService("RunService"), game:GetService("UserInputService")
+
+-- 物理力
+local vel = Instance.new("BodyVelocity")
+vel.MaxForce = Vector3.new(1, 1, 1) * 1e5
+vel.P = 12500
+
+local gyro = Instance.new("BodyGyro")
+gyro.MaxTorque = Vector3.new(1, 1, 1) * 1e6
+gyro.P = 3000
+
+local originalRotation = nil
+
+-- 视觉轮廓 (SelectionBox)
+local SelectionBox = Instance.new("SelectionBox")
+SelectionBox.Name = "轮廓"
+SelectionBox.LineThickness = 0.08
+SelectionBox.Parent = game:GetService("CoreGui")
+
+-- 磁铁
+local imanActivo, radioIman, fuerzaIman = false, 30, 200
+local objetosIman, gravityBackup = {}, {}
+local actualRadio = radioIman
+
+-- 高级视觉圆圈（也用于在UI上表示半径）
+local usingDrawing = Drawing and Drawing.new and typeof(Drawing.new)=="function"
+local imancircle, circleGui, circleImg
+local circleColor = Color3.fromRGB(0,170,255)
+local surfacePos, surfaceNormal = Vector3.zero, Vector3.new(0,1,0)
+
+if usingDrawing then
+	imancircle = Drawing.new("Circle")
+	imancircle.Visible, imancircle.Transparency, imancircle.Color, imancircle.Thickness, imancircle.Filled = false, 1, circleColor, 2, false
+else
+	circleGui = Instance.new("BillboardGui")
+	circleGui.Name, circleGui.Size, circleGui.SizeOffset, circleGui.AlwaysOnTop = "磁铁圆圈Gui", UDim2.new(2,0,2,0), Vector2.new(0,0), true
+	circleGui.Parent = workspace
+	circleImg = Instance.new("ImageLabel")
+	circleImg.BackgroundTransparency, circleImg.Image, circleImg.ImageColor3 = 1, "rbxassetid://13523341990", circleColor
+	circleImg.AnchorPoint, circleImg.Position, circleImg.Size = Vector2.new(0.5,0.5), UDim2.fromScale(0.5,0.5), UDim2.fromScale(1,1)
+	circleImg.Parent, circleGui.Enabled = circleGui, false
+end
+
+-- 移动 / PC 控件
+local holdLeft, holdRight, holdQ, holdE = false, false, false, false
+local usingGamepad = UIS.GamepadEnabled
+UIS.GamepadConnected:Connect(function() usingGamepad = true end)
+UIS.GamepadDisconnected:Connect(function() usingGamepad = false end)
+
+-- 虚拟鼠标 (像素坐标)
+local virtualMousePos = nil -- Vector2 像素单位；nil 表示尚未设置
+local virtualMouseCenter = Vector2.new(0.5, 0.45) -- 相对于屏幕的中心比例 (x,y) (中心稍微靠上)
+local virtualMouseSize = 60 -- 视觉直径（像素）（尺寸减小）
+local virtualMouseEnabled = UIS.TouchEnabled -- 仅在触摸设备上启用虚拟鼠标
+
+-- GUI 引用，用于从任何地方更新状态
+local GUIrefs = {}
+
+-- 实用函数
+local function esParteDePersonaje(obj)
+	for _, plr in ipairs(game.Players:GetPlayers()) do
+		if plr.Character and obj:IsDescendantOf(plr.Character) then return true end
+	end
+	return false
+end
+
+local function tieneSoldaduraNoAnclada(obj)
+	for _, c in ipairs(obj:GetConnectedParts()) do
+		if c ~= obj and not c.Anchored then return true end
+	end
+	return false
+end
+
+local function restaurarGravedad()
+	for obj, oldGravity in pairs(gravityBackup) do
+		if obj and obj:IsDescendantOf(workspace) then obj.CustomPhysicalProperties = oldGravity end
+	end
+	gravityBackup = {}
+end
+
+local function lerpVec3(a, b, t) return a + (b - a) * t end
+
+-- 屏幕尺寸辅助函数
+local function getScreenSize()
+	local vs = camera.ViewportSize
+	return vs.X, vs.Y
+end
+
+local function computeVirtualCenterPixels()
+	local sx, sy = getScreenSize()
+	return Vector2.new(sx * virtualMouseCenter.X, sy * virtualMouseCenter.Y)
+end
+
+-- 如果是触摸设备，将 virtualMousePos 初始化为中心
+if virtualMouseEnabled then
+	virtualMousePos = computeVirtualCenterPixels()
+end
+
+-- GUI 隐藏状态
+local guiHidden = false
+
+-- getInputPosition: 在触摸设备上优先使用虚拟鼠标，否则使用真实鼠标 (player:GetMouse 以获取准确的视口坐标)
+local function getInputPosition()
+	-- 如果启用触摸和虚拟鼠标 -> 使用虚拟位置
+	if UIS.TouchEnabled and virtualMouseEnabled and virtualMousePos then
+		return virtualMousePos.X, virtualMousePos.Y
+	end
+	-- 对于 PC，使用玩家的 mouse.X/Y (在某些情况下比 GetMouseLocation 更精确)
+	local m = player:GetMouse()
+	if m and m.X and m.Y then
+		return m.X, m.Y
+	end
+	-- 备用方案
+	local pos = UIS:GetMouseLocation()
+	return pos.X, pos.Y
+end
+
+-- 从屏幕进行射线投射的辅助函数
+local function raycastFromScreen(x, y, maxDist)
+	-- 使用 ScreenPointToRay 和像素坐标
+	local ray = camera:ScreenPointToRay(x, y)
+	local dist = maxDist or 1000
+	return workspace:FindPartOnRayWithIgnoreList(Ray.new(ray.Origin, ray.Direction * dist), {player.Character})
+end
+
+-- 根据状态更新按钮外观
+local function updateButtonStates()
+	if GUIrefs.magnetBtn and GUIrefs.grabBtn then
+		-- 磁铁: 激活时亮蓝色，未激活时深灰色
+		if imanActivo then
+			GUIrefs.magnetBtn.BackgroundColor3 = Color3.fromRGB(25,130,255)
+			GUIrefs.magnetBtn.TextColor3 = Color3.fromRGB(255,255,255)
+			GUIrefs.magnetBtn.Text = "磁铁 ✓"
+		else
+			GUIrefs.magnetBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+			GUIrefs.magnetBtn.TextColor3 = Color3.fromRGB(240,240,240)
+			GUIrefs.magnetBtn.Text = "磁铁"
+		end
+		-- 抓取: 持有物体时绿色
+		if holding then
+			GUIrefs.grabBtn.BackgroundColor3 = Color3.fromRGB(45,195,100)
+			GUIrefs.grabBtn.Text = "释放"
+		else
+			GUIrefs.grabBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+			GUIrefs.grabBtn.Text = "抓取"
+		end
+	end
+end
+
+-- 虚拟鼠标视觉和磁铁半径在 UI 上的覆盖层
+local radiusScreenScale = 2.0 -- 将 radioIman (世界单位) 转换为 UI 像素的任意因子（可调整）
+local function updateVMVisuals()
+	local screenX, screenY = getScreenSize()
+	if not GUIrefs.screenGui then return end
+	-- 虚拟鼠标框架
+	if GUIrefs.vm and virtualMousePos then
+		local px = math.clamp(virtualMousePos.X - virtualMouseSize/2, 0, screenX - virtualMouseSize)
+		local py = math.clamp(virtualMousePos.Y - virtualMouseSize/2, 0, screenY - virtualMouseSize)
+		GUIrefs.vm.Position = UDim2.new(0, px, 0, py)
+	end
+	-- UI 上的磁铁覆盖层：中心在 virtualMousePos（如果不是触摸则为中心鼠标位置）
+	if GUIrefs.vmCircle then
+		local cx, cy = getInputPosition()
+		-- 计算像素半径
+		local radPx = math.clamp(math.floor(radioIman * radiusScreenScale), 8, math.min(screenX, screenY))
+		GUIrefs.vmCircle.Size = UDim2.new(0, radPx*2, 0, radPx*2)
+		GUIrefs.vmCircle.Position = UDim2.new(0, cx - radPx, 0, cy - radPx)
+		GUIrefs.vmCircle.ImageColor3 = imanActivo and Color3.fromRGB(60,170,255) or Color3.fromRGB(80,80,80)
+		GUIrefs.vmCircle.Visible = true
+	end
+end
+
+-- RenderStepped: 高亮显示，控制世界中的磁铁圆圈并更新 UI 视觉
+run.RenderStepped:Connect(function()
+	-- 高亮 / 选择
+	if guiHidden then
+		-- GUI 隐藏时隐藏轮廓
+		if SelectionBox and SelectionBox.Parent then
+			SelectionBox.Parent = nil
+		end
+	else
+		-- GUI 可见时确保 SelectionBox 有父级
+		if SelectionBox and not SelectionBox.Parent then
+			SelectionBox.Parent = game:GetService("CoreGui")
+		end
+
+		if imanActivo and not holding then
+			SelectionBox.Adornee = nil
+		else
+			if holding and target then
+				SelectionBox.Color3, SelectionBox.Adornee = Color3.fromRGB(0,255,0), target
+			else
+				local sx, sy = getInputPosition()
+				local hit, pos = raycastFromScreen(sx, sy, 1000)
+				if hit and hit:IsA("BasePart") and not hit.Anchored and not esParteDePersonaje(hit) then
+					SelectionBox.Color3, SelectionBox.Adornee = Color3.fromRGB(0,170,255), hit
+				else
+					SelectionBox.Adornee = nil
+				end
+			end
+		end
+	end
+
+	-- 更新世界中的磁铁：现在其中心使用 getInputPosition（移动设备上的虚拟鼠标或 PC 上的鼠标）
+	if imanActivo then
+		local sx, sy = getInputPosition()
+		local ray = camera:ScreenPointToRay(sx, sy)
+		local hit, pos, norm = workspace:FindPartOnRayWithIgnoreList(Ray.new(ray.Origin, ray.Direction * 1000), {player.Character})
+		if hit then
+			surfacePos, surfaceNormal = lerpVec3(surfacePos,pos,0.35), lerpVec3(surfaceNormal,norm,0.35)
+		else
+			local defPos = ray.Origin + ray.Direction * 15
+			surfacePos, surfaceNormal = lerpVec3(surfacePos,defPos,0.15), lerpVec3(surfaceNormal,Vector3.new(0,1,0),0.15)
+		end
+		actualRadio = actualRadio + (radioIman - actualRadio) * 0.25
+
+		if usingDrawing then
+			local screenPos = camera:WorldToViewportPoint(surfacePos)
+			imancircle.Visible, imancircle.Position, imancircle.Radius = true, Vector2.new(screenPos.X, screenPos.Y), actualRadio
+		else
+			circleGui.Enabled, circleGui.Size = true, UDim2.new(0,actualRadio*2,0,actualRadio*2)
+			circleGui.CFrame = CFrame.new(surfacePos, surfacePos + camera.CFrame.LookVector)
+				* CFrame.fromMatrix(Vector3.zero,
+					surfaceNormal:Cross(Vector3.new(0,1,0)).Magnitude>0.01 and surfaceNormal:Cross(Vector3.new(0,1,0)).Unit or Vector3.new(1,0,0),
+					surfaceNormal,
+					-surfaceNormal:Cross(Vector3.new(1,0,0)).Unit)
+			circleGui.Position = surfacePos
+		end
+	else
+		if usingDrawing then imancircle.Visible = false
+		elseif circleGui then circleGui.Enabled = false end
+	end
+
+	-- 更新 VM 视觉和按钮状态
+	updateVMVisuals()
+	updateButtonStates()
+end)
+
+-- Heartbeat: 物体移动，磁铁，距离调整
+run.Heartbeat:Connect(function()
+	-- 正常远程操控
+	if holding and target then
+		if not anchoredWhileHolding then
+			local grabPos
+			if usingGamepad then
+				grabPos = camera.CFrame.Position + camera.CFrame.LookVector.Unit * holdDistance
+			else
+				local sx, sy = getInputPosition()
+				local ray = camera:ScreenPointToRay(sx, sy)
+				grabPos = ray.Origin + ray.Direction.Unit * holdDistance
+			end
+			vel.Velocity = (grabPos - target.Position) * 5
+			if originalRotation then
+				gyro.CFrame = originalRotation + target.Position
+			end
+		else
+			vel.Velocity = Vector3.zero
+		end
+	end
+
+	-- 磁铁块
+	if imanActivo then
+		local centro, nuevosAtraidos = surfacePos, {}
+		local nearby = workspace:GetPartBoundsInBox(CFrame.new(centro), Vector3.new(radioIman*2, radioIman*2, radioIman*2))
+		for _, obj in ipairs(nearby) do
+			if obj:IsA("BasePart") and not obj.Anchored and not esParteDePersonaje(obj)
+				and not tieneSoldaduraNoAnclada(obj) and obj.Transparency < 1 and obj.CanCollide and obj ~= target then
+				local distancia = (obj.Position - centro).Magnitude
+				if distancia <= radioIman then
+					local bv = obj:FindFirstChild("ImanBV") or Instance.new("BodyVelocity")
+					bv.Name, bv.MaxForce, bv.P = "ImanBV", Vector3.new(1,1,1)*1e5, 15000
+					local dir = (centro - obj.Position) * Vector3.new(1,0,1)
+					if dir.Magnitude > 0 then
+						bv.Velocity = dir.Unit * fuerzaIman
+					else
+						bv.Velocity = Vector3.zero
+					end
+					bv.Parent = obj
+					if not gravityBackup[obj] then
+						gravityBackup[obj] = obj.CustomPhysicalProperties
+						obj.CustomPhysicalProperties = PhysicalProperties.new(0, 0.3, 0.5, 1, 1)
+					end
+					nuevosAtraidos[obj] = true
+				end
+			end
+		end
+		for obj in pairs(objetosIman) do
+			if not nuevosAtraidos[obj] then
+				if obj and obj:FindFirstChild("ImanBV") then obj.ImanBV:Destroy() end
+				if gravityBackup[obj] then obj.CustomPhysicalProperties = gravityBackup[obj]; gravityBackup[obj] = nil end
+			end
+		end
+		objetosIman = nuevosAtraidos
+	else
+		for obj in pairs(objetosIman) do if obj and obj:FindFirstChild("ImanBV") then obj.ImanBV:Destroy() end end
+		restaurarGravedad()
+		objetosIman = {}
+	end
+
+	-- 通过移动按钮 (holdLeft / holdRight) 或键盘 (Q/E) 调整距离或半径
+	if imanActivo then
+		if holdLeft or holdQ then radioIman = math.max(5, radioIman - 1.3)
+		elseif holdRight or holdE then radioIman = math.min(200, radioIman + 1.3) end
+	else
+		if holdLeft or holdQ then holdDistance = math.max(2, holdDistance - 0.4)
+		elseif holdRight or holdE then holdDistance = math.min(1000, holdDistance + 0.4) end
+	end
+end)
+
+-- 主要操作（从移动按钮和 PC 控件使用）
+function agarrarOSoltar()
+	if imanActivo then
+		pcall(function()
+			game.StarterGui:SetCore("SendNotification", {
+				Title = "🧲 磁铁已激活",
+				Text = "释放磁铁以抓取物体",
+				Duration = 2
+			})
+		end)
+		return
+	end
+
+	if holding then
+		originalRotation = nil
+		vel.Parent, gyro.Parent, anchoredWhileHolding, target, holding = nil, nil, false, nil, false
+		updateButtonStates()
+	else
+		local sx, sy = getInputPosition()
+		local part, pos = raycastFromScreen(sx, sy, 1000)
+		if part and part:IsA("BasePart") and not part.Anchored and not esParteDePersonaje(part) then
+			target, anchoredWhileHolding = part, false
+			originalRotation = part.CFrame - part.Position
+			gyro.CFrame = originalRotation + part.Position
+			gyro.Parent = part
+			vel.Velocity, vel.Parent = Vector3.zero, part
+			if pos then
+				holdDistance = (camera.CFrame.Position - pos).Magnitude
+			else
+				holdDistance = (camera.CFrame.Position - part.Position).Magnitude
+			end
+			holding = true
+			updateButtonStates()
+		end
+	end
+end
+
+function lanzar()
+	if imanActivo then
+		pcall(function()
+			game.StarterGui:SetCore("SendNotification", {
+				Title = "🧲 磁铁已激活",
+				Text = "停用磁铁以投掷物体",
+				Duration = 2
+			})
+		end)
+		return
+	end
+
+	if holding and target then
+		if anchoredWhileHolding then target.Anchored, anchoredWhileHolding = false, false end
+		vel.Parent, gyro.Parent, holding = nil, nil, false
+		originalRotation = nil
+		local impulse = Instance.new("BodyVelocity")
+		impulse.Velocity = camera.CFrame.LookVector * 1000
+		impulse.MaxForce, impulse.P, impulse.Parent = Vector3.new(1,1,1)*1e6, 12500, target
+		game:GetService("Debris"):AddItem(impulse, 0.5)
+		target = nil
+		updateButtonStates()
+	end
+end
+
+function alternarAnclado()
+	if imanActivo then
+		pcall(function()
+			game.StarterGui:SetCore("SendNotification", {
+				Title = "🧲 磁铁已激活",
+				Text = "停用磁铁以锚定物体",
+				Duration = 2
+			})
+		end)
+		return
+	end
+
+	if holding and target then
+		anchoredWhileHolding = not anchoredWhileHolding
+		target.Anchored = anchoredWhileHolding
+
+		if anchoredWhileHolding then
+			vel.Parent = nil
+			gyro.Parent = nil
+			target.AssemblyLinearVelocity = Vector3.zero
+			target.AssemblyAngularVelocity = Vector3.zero
+
+			local humanoidRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+			if humanoidRoot and (humanoidRoot.Position - target.Position).Magnitude < 5 then
+				humanoidRoot.Velocity = Vector3.zero
+				humanoidRoot.AssemblyLinearVelocity = Vector3.zero
+				humanoidRoot.CFrame = humanoidRoot.CFrame + Vector3.new(0, 3, 0)
+			end
+		else
+			vel.Parent = target
+			gyro.Parent = target
+		end
+
+		pcall(function()
+			game.StarterGui:SetCore("SendNotification", {
+				Title = anchoredWhileHolding and "📌 已锚定" or "📎 已取消锚定",
+				Text = "点击锚定以切换",
+				Duration = 2
+			})
+		end)
+	end
+end
+
+local function toggleIman()
+	if holding then
+		pcall(function()
+			game.StarterGui:SetCore("SendNotification", {
+				Title = "❌ 不可用",
+				Text = "释放物体以激活磁铁",
+				Duration = 2
+			})
+		end)
+		return
+	end
+	imanActivo = not imanActivo
+	if not imanActivo then restaurarGravedad() end
+	updateButtonStates()
+	pcall(function()
+		game.StarterGui:SetCore("SendNotification", {
+			Title = imanActivo and "🧲 磁铁模式 已激活" or "🧲 磁铁模式 已停用",
+			Text = "仅吸引蓝色圆圈内的松散部件",
+			Duration = 2
+		})
+	end)
+end
+
+local function mostrarPanelMovil()
+	pcall(function()
+		game.StarterGui:SetCore("SendNotification", {
+			Title = "Kenny汉化b站UID:1531514159",
+			Text = "• 抓取 → '抓取'按钮\n• 投掷 → '投掷'按钮\n• 锚定 → '锚定'按钮\n• 磁铁 → '磁铁'按钮\n• 按住 - / + → 拉近/推远\n• 触摸并拖动 ' ? ' 按钮可移动它\n• '隐藏'按钮可隐藏界面（自身按钮除外）",
+			Duration = 8
+		})
+	end)
+end
+
+-- 创建改进的移动界面
+-- 应用的更改：
+-- 1) 栏顺序（左 -> 右）：锚定 | + | - | 磁铁 | 抓取 | 投掷
+-- 2) 一次只允许移动一个小部件 (draggingWidget 锁)。
+-- 3) 移动隐藏按钮时不会移动 "?" 按钮（它们是独立的）。
+local draggingWidget = nil -- nil 或 "help"/"hide"/"vm"
+local function crearGUI_Movil()
+	local playerGui = player:WaitForChild("PlayerGui")
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "LevitatoMobileGui"
+	screenGui.ResetOnSpawn = false
+	screenGui.Parent = playerGui
+	GUIrefs.screenGui = screenGui
+
+	-- 基础：半透明底部栏，带有圆角按钮和间距
+	local bottomBar = Instance.new("Frame")
+	bottomBar.Name = "BottomBar"
+	bottomBar.AnchorPoint = Vector2.new(0.5, 1)
+	bottomBar.Size = UDim2.new(0.9, 0, 0, 90)
+	bottomBar.Position = UDim2.new(0.5, 0, 1, -20)
+	bottomBar.BackgroundColor3 = Color3.fromRGB(20,20,20)
+	bottomBar.BackgroundTransparency = 0.45
+	bottomBar.BorderSizePixel = 0
+	bottomBar.Parent = screenGui
+	GUIrefs.bottomBar = bottomBar
+	local corner = Instance.new("UICorner", bottomBar)
+	corner.CornerRadius = UDim.new(0, 18)
+	local stroke = Instance.new("UIStroke", bottomBar)
+	stroke.Color = Color3.fromRGB(80,80,80)
+	stroke.Transparency = 0.6
+	stroke.Thickness = 2
+
+	local layout = Instance.new("UIListLayout", bottomBar)
+	layout.FillDirection = Enum.FillDirection.Horizontal
+	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	layout.VerticalAlignment = Enum.VerticalAlignment.Center
+	layout.Padding = UDim.new(0, 12)
+
+	-- 辅助函数，用于创建透明圆角按钮
+	local function makeButton(name, text, size)
+		local b = Instance.new("TextButton")
+		b.Name = name
+		b.Text = text
+		b.Font = Enum.Font.GothamBold
+		b.TextScaled = true
+		b.TextColor3 = Color3.fromRGB(240,240,240)
+		b.BackgroundColor3 = Color3.fromRGB(30,30,30)
+		b.BackgroundTransparency = 0.55
+		b.BorderSizePixel = 0
+		b.Size = size or UDim2.new(0,120,0,60)
+		b.AutoButtonColor = false
+		local uic = Instance.new("UICorner", b)
+		uic.CornerRadius = UDim.new(0,14)
+		local vstroke = Instance.new("UIStroke", b)
+		vstroke.Color = Color3.fromRGB(110,110,110)
+		vstroke.Transparency = 0.6
+		vstroke.Thickness = 1.5
+		return b
+	end
+
+	-- 按请求的确切顺序创建按钮：
+	-- 锚定 | + | - | 磁铁 | 抓取 | 投掷
+
+	local anchorBtn = makeButton("AnchorBtn", "锚定", UDim2.new(0,110,0,62))
+	anchorBtn.Parent = bottomBar
+
+	local zoomInBtn = makeButton("ZoomInBtn", "+", UDim2.new(0,56,0,56))
+	zoomInBtn.Parent = bottomBar
+
+	local zoomOutBtn = makeButton("ZoomOutBtn", "-", UDim2.new(0,56,0,56))
+	zoomOutBtn.Parent = bottomBar
+
+	local magnetBtn = makeButton("MagnetBtn", "磁铁", UDim2.new(0,110,0,62))
+	magnetBtn.Parent = bottomBar
+
+	local grabBtn = makeButton("GrabBtn", "抓取", UDim2.new(0,110,0,62))
+	grabBtn.Parent = bottomBar
+
+	local throwBtn = makeButton("ThrowBtn", "投掷", UDim2.new(0,110,0,62))
+	throwBtn.Parent = bottomBar
+
+	-- 保存引用
+	GUIrefs.anchorBtn = anchorBtn
+	GUIrefs.zoomInBtn = zoomInBtn
+	GUIrefs.zoomOutBtn = zoomOutBtn
+	GUIrefs.magnetBtn = magnetBtn
+	GUIrefs.grabBtn = grabBtn
+	GUIrefs.throwBtn = throwBtn
+
+	-- 浮动可移动帮助按钮（带透明度和圆角边框）
+	local helpBtn = Instance.new("TextButton")
+	helpBtn.Name = "HelpBtn"
+	helpBtn.Text = "?"
+	helpBtn.Font = Enum.Font.GothamBlack
+	helpBtn.TextScaled = true
+	helpBtn.TextColor3 = Color3.fromRGB(255,255,255)
+	helpBtn.BackgroundColor3 = Color3.fromRGB(20,20,20)
+	helpBtn.BackgroundTransparency = 0.5
+	helpBtn.Size = UDim2.new(0,68,0,68)
+	helpBtn.AnchorPoint = Vector2.new(0.5,0)
+	helpBtn.Position = UDim2.new(0.86, 0, 0.03, 0)
+	helpBtn.Parent = screenGui
+	GUIrefs.helpBtn = helpBtn
+	local helpCorner = Instance.new("UICorner", helpBtn)
+	helpCorner.CornerRadius = UDim.new(0, 18)
+	local helpStroke = Instance.new("UIStroke", helpBtn)
+	helpStroke.Color = Color3.fromRGB(100,100,100)
+	helpStroke.Transparency = 0.5
+	helpStroke.Thickness = 2
+
+	-- 隐藏按钮（可移动且独立）
+	local hideBtn = Instance.new("TextButton")
+	hideBtn.Name = "HideBtn"
+	hideBtn.Text = "⦿"
+	hideBtn.Font = Enum.Font.GothamBold
+	hideBtn.TextScaled = true
+	hideBtn.TextColor3 = Color3.fromRGB(255,255,255)
+	hideBtn.BackgroundColor3 = Color3.fromRGB(20,20,20)
+	hideBtn.BackgroundTransparency = 0.5
+	hideBtn.Size = UDim2.new(0,48,0,48)
+	hideBtn.AnchorPoint = Vector2.new(0,0)
+	hideBtn.Position = UDim2.new(0.95, -36, 0.03, 18)
+	hideBtn.Parent = screenGui
+	GUIrefs.hideBtn = hideBtn
+	local hideCorner = Instance.new("UICorner", hideBtn)
+	hideCorner.CornerRadius = UDim.new(0, 12)
+	local hideStroke = Instance.new("UIStroke", hideBtn)
+	hideStroke.Color = Color3.fromRGB(100,100,100)
+	hideStroke.Transparency = 0.5
+	hideStroke.Thickness = 2
+
+	-- 虚拟鼠标视觉（圆圈）
+	local vm = Instance.new("Frame")
+	vm.Name = "VirtualMouse"
+	vm.AnchorPoint = Vector2.new(0, 0)
+	vm.Size = UDim2.new(0, virtualMouseSize, 0, virtualMouseSize)
+	vm.BackgroundTransparency = 0.6
+	vm.BackgroundColor3 = Color3.fromRGB(10,10,10)
+	vm.Parent = screenGui
+	GUIrefs.vm = vm
+	local vmCorner = Instance.new("UICorner", vm)
+	vmCorner.CornerRadius = UDim.new(1,0)
+	local vmStroke = Instance.new("UIStroke", vm)
+	vmStroke.Color = Color3.fromRGB(60,160,255)
+	vmStroke.Transparency = 0.4
+	vmStroke.Thickness = 2
+	-- 内部点（缩小以匹配较小的 VM）
+	local vmDot = Instance.new("Frame")
+	vmDot.Name = "Dot"
+	vmDot.AnchorPoint = Vector2.new(0.5, 0.5)
+	vmDot.Size = UDim2.new(0, 12, 0, 12)
+	vmDot.Position = UDim2.fromScale(0.5, 0.5)
+	vmDot.BackgroundColor3 = Color3.fromRGB(60,160,255)
+	vmDot.BackgroundTransparency = 0
+	vmDot.Parent = vm
+	local vmDotCorner = Instance.new("UICorner", vmDot)
+	vmDotCorner.CornerRadius = UDim.new(1,0)
+
+	-- 覆盖圆圈图像，用于在屏幕上表示磁铁半径（因此 UI 圆圈与虚拟鼠标匹配）
+	local vmCircle = Instance.new("ImageLabel")
+	vmCircle.Name = "VirtualMagnetCircle"
+	vmCircle.BackgroundTransparency = 1
+	vmCircle.Image = "rbxassetid://13523341990"
+	vmCircle.ImageColor3 = circleColor
+	vmCircle.AnchorPoint = Vector2.new(0,0)
+	vmCircle.Size = UDim2.new(0, 100, 0, 100)
+	vmCircle.Position = UDim2.new(0, 0, 0, 0)
+	vmCircle.ZIndex = 2
+	vmCircle.Visible = false
+	vmCircle.Parent = screenGui
+	GUIrefs.vmCircle = vmCircle
+
+	-- 根据 virtualMousePos（像素）或中心放置 VM
+	local function placeVMAtPixels(p)
+		local sx, sy = getScreenSize()
+		vm.Position = UDim2.new(0, math.clamp(p.X - virtualMouseSize/2, 0, sx - virtualMouseSize), 0, math.clamp(p.Y - virtualMouseSize/2, 0, sy - virtualMouseSize))
+	end
+
+	if virtualMousePos then
+		placeVMAtPixels(virtualMousePos)
+	else
+		local center = computeVirtualCenterPixels()
+		virtualMousePos = center
+		placeVMAtPixels(center)
+	end
+
+	-- 按钮连接
+	magnetBtn.MouseButton1Click:Connect(function() toggleIman() end)
+	grabBtn.MouseButton1Click:Connect(function() agarrarOSoltar() end)
+	throwBtn.MouseButton1Click:Connect(function() lanzar() end)
+	anchorBtn.MouseButton1Click:Connect(function() alternarAnclado() end)
+	helpBtn.MouseButton1Click:Connect(function() mostrarPanelMovil() end)
+
+	-- 缩放连接（保持先前行为）
+	zoomInBtn.MouseButton1Down:Connect(function() holdRight = true end)
+	zoomInBtn.MouseButton1Up:Connect(function() holdRight = false end)
+	zoomInBtn.MouseLeave:Connect(function() holdRight = false end)
+
+	zoomOutBtn.MouseButton1Down:Connect(function() holdLeft = true end)
+	zoomOutBtn.MouseButton1Up:Connect(function() holdLeft = false end)
+	zoomOutBtn.MouseLeave:Connect(function() holdLeft = false end)
+
+	-- 使可移动小部件尊重单个手指/输入进行拖动（锁定）
+	-- 此外：helpBtn 和 hideBtn 现在独立移动；一次只能移动一个小部件。
+	do
+		-- 帮助拖动
+		do
+			local dragging = false
+			local dragInput = nil
+			helpBtn.InputBegan:Connect(function(input)
+				if draggingWidget ~= nil then return end
+				if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+					dragging = true
+					dragInput = input
+					draggingWidget = "help"
+					input.Changed:Connect(function()
+						if input.UserInputState == Enum.UserInputState.End then
+							dragging = false
+							dragInput = nil
+							if draggingWidget == "help" then draggingWidget = nil end
+						end
+					end)
+				end
+			end)
+			UIS.InputChanged:Connect(function(input)
+				if dragging and dragInput and input == dragInput and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+					local sx, sy = getScreenSize()
+					local mousePos = input.Position or UIS:GetMouseLocation()
+					if mousePos then
+						local newX = math.clamp(mousePos.X / sx, 0.02, 0.98)
+						local newY = math.clamp(mousePos.Y / sy, 0.02, 0.98)
+						helpBtn.Position = UDim2.new(newX, 0, newY, 0)
+					end
+				end
+			end)
+		end
+
+		-- 隐藏拖动（独立；不移动 helpBtn）
+		do
+			local dragging = false
+			local dragInput = nil
+			hideBtn.InputBegan:Connect(function(input)
+				if draggingWidget ~= nil then return end
+				if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+					dragging = true
+					dragInput = input
+					draggingWidget = "hide"
+					input.Changed:Connect(function()
+						if input.UserInputState == Enum.UserInputState.End then
+							dragging = false
+							dragInput = nil
+							if draggingWidget == "hide" then draggingWidget = nil end
+						end
+					end)
+				end
+			end)
+			UIS.InputChanged:Connect(function(input)
+				if dragging and dragInput and input == dragInput and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+					local sx, sy = getScreenSize()
+					local mousePos = input.Position or UIS:GetMouseLocation()
+					if mousePos then
+						local newX = math.clamp(mousePos.X / sx, 0.02, 0.98)
+						local newY = math.clamp(mousePos.Y / sy, 0.02, 0.98)
+						hideBtn.Position = UDim2.new(newX, 0, newY, 0)
+					end
+				end
+			end)
+		end
+
+		-- VM 拖动
+		do
+			local draggingVM = false
+			local currentInput = nil
+
+			local function updateVMPositionFromInput(inputPos)
+				local sx, sy = getScreenSize()
+				local x = math.clamp(inputPos.X, 1, sx-1)
+				local y = math.clamp(inputPos.Y, 1, sy-1)
+				virtualMousePos = Vector2.new(x, y)
+				placeVMAtPixels(virtualMousePos)
+			end
+
+			vm.InputBegan:Connect(function(input)
+				if draggingWidget ~= nil then return end
+				if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+					draggingVM = true
+					currentInput = input
+					draggingWidget = "vm"
+					local pos = input.Position or UIS:GetMouseLocation()
+					if pos then updateVMPositionFromInput(pos) end
+					input.Changed:Connect(function()
+						if input.UserInputState == Enum.UserInputState.End then
+							draggingVM = false
+							currentInput = nil
+							if draggingWidget == "vm" then draggingWidget = nil end
+						end
+					end)
+				end
+			end)
+
+			UIS.InputChanged:Connect(function(input)
+				if draggingVM and currentInput and input == currentInput and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+					local pos = input.Position or UIS:GetMouseLocation()
+					if pos then updateVMPositionFromInput(pos) end
+				end
+			end)
+		end
+	end
+
+	-- 隐藏按钮：隐藏除自身按钮外的所有内容（并且可以移动）
+	hideBtn.MouseButton1Click:Connect(function()
+		guiHidden = not guiHidden
+		if guiHidden then
+			-- 隐藏底部栏、vm、vmCircle、helpBtn 和选择轮廓；保持 hideBtn 可见
+			if GUIrefs.bottomBar then GUIrefs.bottomBar.Visible = false end
+			if GUIrefs.vm then GUIrefs.vm.Visible = false end
+			if GUIrefs.vmCircle then GUIrefs.vmCircle.Visible = false end
+			if GUIrefs.helpBtn then GUIrefs.helpBtn.Visible = false end
+
+			-- 从 CoreGui 中移除 SelectionBox 以隐藏轮廓
+			if SelectionBox and SelectionBox.Parent then
+				SelectionBox.Parent = nil
+			end
+
+			hideBtn.Text = "◤"
+			-- 使 hideBtn 更可见
+			hideBtn.BackgroundTransparency = 0
+			hideBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+		else
+			-- 再次显示所有内容
+			if GUIrefs.bottomBar then GUIrefs.bottomBar.Visible = true end
+			if GUIrefs.vm then GUIrefs.vm.Visible = true end
+			-- vmCircle 可见性将在 updateVMVisuals() 中设置
+			if GUIrefs.helpBtn then GUIrefs.helpBtn.Visible = true end
+
+			-- 恢复 SelectionBox 父级以使轮廓重新出现
+			if SelectionBox and not SelectionBox.Parent then
+				SelectionBox.Parent = game:GetService("CoreGui")
+			end
+
+			hideBtn.Text = "⦿"
+			hideBtn.BackgroundTransparency = 0.5
+		end
+	end)
+
+	-- 在 vm 上点击虚拟鼠标：快速抓取（可选便利功能）
+	vm.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.Touch then
+			-- 快速点击 => 抓取/释放，仅当未拖动任何小部件时
+			if draggingWidget == nil then
+				agarrarOSoltar()
+			end
+		end
+	end)
+
+	-- 仅在设备支持触摸时显示
+	screenGui.Enabled = UIS.TouchEnabled
+end
+
+-- 在启动时创建移动 GUI（如果适用）
+crearGUI_Movil()
+
+-- 重新整合 PC 和游戏手柄控件，以便在两种设备上工作
+
+UIS.InputBegan:Connect(function(input, gpe)
+	if gpe then return end
+	if input.UserInputType == Enum.UserInputType.Keyboard then
+		if input.KeyCode == Enum.KeyCode.Q then holdQ = true
+		elseif input.KeyCode == Enum.KeyCode.E then holdE = true
+		elseif input.KeyCode == Enum.KeyCode.R then alternarAnclado()
+		elseif input.KeyCode == Enum.KeyCode.F then lanzar()
+		elseif input.KeyCode == Enum.KeyCode.T then
+			if holding then
+				pcall(function()
+					game.StarterGui:SetCore("SendNotification", {
+						Title = "❌ 不可用",
+						Text = "释放物体以激活磁铁",
+						Duration = 2
+					})
+				end)
+				return
+			end
+			imanActivo = not imanActivo
+			if not imanActivo then restaurarGravedad() end
+			updateButtonStates()
+			pcall(function()
+				game.StarterGui:SetCore("SendNotification", {
+					Title = imanActivo and "🧲 磁铁模式 已激活" or "🧲 磁铁模式 已停用",
+					Text = "仅吸引蓝色圆圈内的松散部件",
+					Duration = 2
+				})
+			end)
+		elseif input.KeyCode == Enum.KeyCode.LeftControl or input.KeyCode == Enum.KeyCode.RightControl then
+			-- 显示 PC 面板（如果在 PC 上很有用）
+			pcall(function()
+				game.StarterGui:SetCore("SendNotification", {
+					Title = "PC 帮助",
+					Text = "⌨️ PC 控件:\n• 左键单击 → 抓取 / 释放\n• F → 投掷\n• Q/E (按住) → 拉近/推远 -- 或更改磁铁区域\n• R → 锚定/取消锚定\n• T → 磁铁模式\n• Ctrl → 显示此面板",
+					Duration = 8
+				})
+			end)
+		end
+	end
+
+	if input.UserInputType == Enum.UserInputType.Gamepad1 and usingGamepad then
+		if input.KeyCode == Enum.KeyCode.ButtonX then agarrarOSoltar()
+		elseif input.KeyCode == Enum.KeyCode.ButtonB then lanzar()
+		elseif input.KeyCode == Enum.KeyCode.ButtonY then alternarAnclado()
+		elseif input.KeyCode == Enum.KeyCode.DPadLeft then holdLeft = true
+		elseif input.KeyCode == Enum.KeyCode.DPadRight then holdRight = true
+		elseif input.KeyCode == Enum.KeyCode.DPadDown then
+			pcall(function()
+				game.StarterGui:SetCore("SendNotification", {
+					Title = "手柄帮助",
+					Text = "🎮 手柄控件:\n• X → 抓取/释放\n• B → 投掷\n• ⬅/➡ (按住) → 拉近/推远 -- 或更改磁铁区域\n• Y → 锚定/取消锚定\n• ⬇ → 显示此面板\n• LB → 磁铁模式 (仅限蓝色圆圈内的松散部件)",
+					Duration = 9
+				})
+			end)
+		elseif input.KeyCode == Enum.KeyCode.ButtonL1 then
+			if holding then
+				pcall(function()
+					game.StarterGui:SetCore("SendNotification", {
+						Title = "❌ 不可用",
+						Text = "释放物体以激活磁铁",
+						Duration = 2
+					})
+				end)
+				return
+			end
+			imanActivo = not imanActivo
+			if not imanActivo then restaurarGravedad() end
+			updateButtonStates()
+			pcall(function()
+				game.StarterGui:SetCore("SendNotification", {
+					Title = imanActivo and "🧲 磁铁模式 已激活" or "🧲 磁铁模式 已停用",
+					Text = "仅吸引蓝色圆圈内的松散部件",
+					Duration = 2
+				})
+			end)
+		end
+	end
+end)
+
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.Keyboard then
+		if input.KeyCode == Enum.KeyCode.Q then holdQ = false
+		elseif input.KeyCode == Enum.KeyCode.E then holdE = false end
+	elseif input.UserInputType == Enum.UserInputType.Gamepad1 then
+		if input.KeyCode == Enum.KeyCode.DPadLeft then holdLeft = false
+		elseif input.KeyCode == Enum.KeyCode.DPadRight then holdRight = false end
+	end
+end)
+
+-- 保持鼠标支持 (PC): 左键单击抓取 / 释放
+local mouse = player:GetMouse()
+mouse.Button1Down:Connect(function()
+	-- 不在触摸虚拟鼠标上时使用真实鼠标（即 PC 模式将使用此功能）
+	if not UIS.TouchEnabled then
+		agarrarOSoltar()
+	end
+end)
+
+-- 初始化 UI 状态更新
+updateButtonStates()

@@ -1,0 +1,906 @@
+--// Services //--
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TextService = game:GetService("TextService")
+local TextChatService = game:GetService("TextChatService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Debris = game:GetService("Debris")
+local GuiService = game:GetService("GuiService")
+
+--// Globals for HTTP Spy
+local GlobalENV = getgenv()
+local Typeof = typeof
+
+--// Configuration //--
+local GUI_TITLE = "Kenny工具 | 右滑有更多 | 我的b站UID:1531514159"
+-- Reduced width to eliminate empty space
+local GUI_WIDTH = 395
+local GUI_HEIGHT = 420
+local TOPBAR_HEIGHT = 30
+local TOOLBAR_HEIGHT = 35
+
+--// Create the main screen GUI //--
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "SpyUtilityGui"
+screenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+screenGui.ResetOnSpawn = false
+
+--// Main Frame //--
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Parent = screenGui
+mainFrame.Size = UDim2.new(0, GUI_WIDTH, 0, GUI_HEIGHT)
+mainFrame.Position = UDim2.new(0.5, -GUI_WIDTH / 2, 0.5, -GUI_HEIGHT / 2)
+mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+mainFrame.BorderColor3 = Color3.fromRGB(80, 80, 100)
+mainFrame.BorderSizePixel = 2
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.ClipsDescendants = true
+
+--// Top Bar //--
+local topBar = Instance.new("Frame")
+topBar.Name = "TopBar"
+topBar.Parent = mainFrame
+topBar.Size = UDim2.new(1, 0, 0, TOPBAR_HEIGHT)
+topBar.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
+topBar.BorderColor3 = Color3.fromRGB(80, 80, 100)
+topBar.BorderSizePixel = 0
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Name = "TitleLabel"
+titleLabel.Parent = topBar
+titleLabel.Size = UDim2.new(1, -TOPBAR_HEIGHT*3, 1, 0) -- Adjusted for new button
+titleLabel.Position = UDim2.new(0, 5, 0, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+titleLabel.Text = GUI_TITLE
+titleLabel.TextSize = 18
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local toggleVisibilityButton = Instance.new("TextButton")
+toggleVisibilityButton.Name = "ToggleVisibilityButton"
+toggleVisibilityButton.Parent = topBar
+toggleVisibilityButton.Size = UDim2.new(0, TOPBAR_HEIGHT, 1, 0)
+toggleVisibilityButton.Position = UDim2.new(1, -TOPBAR_HEIGHT*3, 0, 0) -- Adjusted for new button
+toggleVisibilityButton.BackgroundTransparency = 1
+toggleVisibilityButton.Font = Enum.Font.SourceSansBold
+toggleVisibilityButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+toggleVisibilityButton.Text = "◐"
+toggleVisibilityButton.TextSize = 16
+
+local collapseButton = Instance.new("TextButton")
+collapseButton.Name = "CollapseButton"
+collapseButton.Parent = topBar
+collapseButton.Size = UDim2.new(0, TOPBAR_HEIGHT, 1, 0)
+collapseButton.Position = UDim2.new(1, -TOPBAR_HEIGHT, 0, 0) -- Swapped position
+collapseButton.BackgroundTransparency = 1
+collapseButton.Font = Enum.Font.SourceSansBold
+collapseButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+collapseButton.Text = "▼"
+collapseButton.TextSize = 16
+
+-- New Clear Logs Button
+local clearLogsButton = Instance.new("TextButton")
+clearLogsButton.Name = "ClearLogsButton"
+clearLogsButton.Parent = topBar
+clearLogsButton.Size = UDim2.new(0, TOPBAR_HEIGHT, 1, 0)
+clearLogsButton.Position = UDim2.new(1, -TOPBAR_HEIGHT*2, 0, 0) -- Swapped position
+clearLogsButton.BackgroundTransparency = 1
+clearLogsButton.Font = Enum.Font.SourceSansBold
+clearLogsButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+clearLogsButton.Text = "✉" -- Mail icon
+clearLogsButton.TextSize = 16
+
+--// Unread Message Badge //--
+local unreadBadge = Instance.new("TextLabel")
+unreadBadge.Name = "UnreadBadge"
+unreadBadge.Parent = clearLogsButton
+unreadBadge.Size = UDim2.new(0, 14, 0, 14)
+unreadBadge.AnchorPoint = Vector2.new(0, 1)
+unreadBadge.Position = UDim2.new(0, 2, 1, -2)
+unreadBadge.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+unreadBadge.BorderColor3 = Color3.fromRGB(255, 255, 255)
+unreadBadge.BorderSizePixel = 1
+unreadBadge.Font = Enum.Font.SourceSansBold
+unreadBadge.TextColor3 = Color3.fromRGB(255, 255, 255)
+unreadBadge.Text = "0"
+unreadBadge.TextSize = 9
+unreadBadge.ZIndex = 2
+unreadBadge.Visible = false
+
+local unreadBadgeCorner = Instance.new("UICorner")
+unreadBadgeCorner.CornerRadius = UDim.new(0.5, 0)
+unreadBadgeCorner.Parent = unreadBadge
+
+--// Tool Bar (Scrollable) //--
+local toolBar = Instance.new("ScrollingFrame")
+toolBar.Name = "ToolBar"
+toolBar.Parent = mainFrame
+toolBar.Size = UDim2.new(1, 0, 0, TOOLBAR_HEIGHT)
+toolBar.Position = UDim2.new(0, 0, 0, TOPBAR_HEIGHT)
+toolBar.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+toolBar.BorderSizePixel = 0
+toolBar.ScrollingDirection = Enum.ScrollingDirection.X
+toolBar.ScrollBarThickness = 4
+toolBar.ScrollBarImageColor3 = Color3.fromRGB(160, 160, 180)
+toolBar.ScrollBarImageTransparency = 1
+
+local toolBarLayout = Instance.new("UIListLayout")
+toolBarLayout.Parent = toolBar
+toolBarLayout.FillDirection = Enum.FillDirection.Horizontal
+toolBarLayout.SortOrder = Enum.SortOrder.LayoutOrder
+toolBarLayout.Padding = UDim.new(0, 5)
+toolBarLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+
+local toolBarPadding = Instance.new("UIPadding")
+toolBarPadding.Parent = toolBar
+toolBarPadding.PaddingLeft = UDim.new(0, 5)
+
+local function createToolbarButton(name, text, width)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Parent = toolBar
+    button.Size = UDim2.new(0, width, 0, 28)
+    button.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
+    button.BorderColor3 = Color3.fromRGB(100, 100, 120)
+    button.BorderSizePixel = 1
+    button.Font = Enum.Font.SourceSansBold
+    button.TextColor3 = Color3.fromRGB(220, 220, 220)
+    button.Text = text
+    button.TextSize = 14
+    return button
+end
+
+local chatButton = createToolbarButton("ChatButton", "聊天记录", 90)
+local spectateButton = createToolbarButton("SpectateButton", "观看", 90)
+local teleportButton = createToolbarButton("TeleportButton", "传送", 90)
+local remoteSpyButton = createToolbarButton("RemoteSpyButton", "RSpy", 100)
+local eventSpyButton = createToolbarButton("EventSpyButton", "活动 Spy", 100)
+local httpSpyButton = createToolbarButton("HttpSpyButton", "HTTP Spy", 100)
+toolBar.CanvasSize = UDim2.new(0, toolBarLayout.AbsoluteContentSize.X + 10, 0, 0)
+
+--// Pages Container //--
+local pagesFrame = Instance.new("Frame")
+pagesFrame.Name = "PagesFrame"
+pagesFrame.Parent = mainFrame
+pagesFrame.Size = UDim2.new(1, 0, 1, -TOPBAR_HEIGHT - TOOLBAR_HEIGHT)
+pagesFrame.Position = UDim2.new(0, 0, 0, TOPBAR_HEIGHT + TOOLBAR_HEIGHT)
+pagesFrame.BackgroundTransparency = 1
+pagesFrame.ClipsDescendants = true
+
+local function createPage(name)
+    local scrollingFrame = Instance.new("ScrollingFrame")
+    scrollingFrame.Name = name
+    scrollingFrame.Parent = pagesFrame
+    scrollingFrame.Size = UDim2.new(1, 0, 1, 0)
+    scrollingFrame.Position = UDim2.new(0, 0, 0, 0)
+    scrollingFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+    scrollingFrame.BorderSizePixel = 0
+    scrollingFrame.Visible = false
+    scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(160, 160, 180)
+    scrollingFrame.ScrollBarThickness = 5
+    scrollingFrame.ScrollBarImageTransparency = 1
+    
+    local layout = Instance.new("UIListLayout")
+    layout.Parent = scrollingFrame
+    layout.Padding = UDim.new(0, 2)
+    
+    local padding = Instance.new("UIPadding")
+    padding.Parent = scrollingFrame
+    padding.PaddingLeft = UDim.new(0, 5)
+    padding.PaddingRight = UDim.new(0, 5)
+    padding.PaddingTop = UDim.new(0, 5)
+    padding.PaddingBottom = UDim.new(0, 5)
+
+    return scrollingFrame, layout
+end
+
+--// Create all pages //--
+local logContainer, uiListLayout = createPage("LogContainer")
+local dropdownList, dropdownLayout = createPage("DropdownList") -- For Spectate/Teleport
+local remoteSpyList, remoteSpyLayout = createPage("RemoteSpyList")
+local eventSpyList, eventSpyLayout = createPage("EventSpyList")
+local httpSpyPage, httpSpyLayout = createPage("HttpSpyPage")
+
+--// HTTP Spy Page Setup //--
+local httpClearButton = Instance.new("TextButton")
+httpClearButton.Name = "HttpClearButton"
+httpClearButton.Parent = httpSpyPage
+httpClearButton.Size = UDim2.new(1, 0, 0, 25)
+httpClearButton.BackgroundColor3 = Color3.fromRGB(140, 70, 70)
+httpClearButton.BorderColor3 = Color3.fromRGB(170, 100, 100)
+httpClearButton.BorderSizePixel = 1
+httpClearButton.Font = Enum.Font.SourceSansBold
+httpClearButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+httpClearButton.Text = "http日志"
+httpClearButton.TextSize = 14
+httpClearButton.LayoutOrder = -1 -- To keep it at the top
+
+httpClearButton.MouseButton1Click:Connect(function()
+    for _, child in ipairs(httpSpyPage:GetChildren()) do
+        if child.Name == "HttpLogEntry" then
+            child:Destroy()
+        end
+    end
+    task.wait()
+    httpSpyPage.CanvasSize = UDim2.new(0, 0, 0, httpSpyLayout.AbsoluteContentSize.Y + 9)
+end)
+
+
+--// Variables //--
+local isCollapsed = false
+local isVisible = true
+local dropdownMode = nil -- "spectate" or "teleport"
+local spectatingPlayer = nil
+local originalCameraSubject = nil
+local unreadMessages = 0
+local isAtBottom = true -- Changed variable name for clarity
+local activePage = "chat"
+local spectateCharConn = nil
+local firstUnreadMessageFrame = nil
+local teleportingToPlayer = nil
+local originalPosition = nil
+
+local pages = {
+    chat = logContainer,
+    spectate = dropdownList,
+    teleport = dropdownList,
+    remote = remoteSpyList,
+    event = eventSpyList,
+    http = httpSpyPage
+}
+
+local buttons = {
+    chat = chatButton,
+    spectate = spectateButton,
+    teleport = teleportButton,
+    remote = remoteSpyButton,
+    event = eventSpyButton,
+    http = httpSpyButton
+}
+
+--// Functions //--
+
+local function clearAllLogs()
+    for _, child in ipairs(logContainer:GetChildren()) do
+        if child.Name == "MsgFrame" then
+            child:Destroy()
+        end
+    end
+    -- Reset canvas size and unread messages
+    logContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+    unreadMessages = 0
+    unreadBadge.Visible = false
+    firstUnreadMessageFrame = nil
+    -- BUG FIX: Manually set isAtBottom to true as the log is now empty.
+    isAtBottom = true
+end
+
+local function toggleCollapse(onComplete)
+    isCollapsed = not isCollapsed
+    local targetHeight = isCollapsed and TOPBAR_HEIGHT or GUI_HEIGHT
+    collapseButton.Text = isCollapsed and "►" or "▼"
+    
+    local tween = TweenService:Create(mainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, GUI_WIDTH, 0, targetHeight)})
+    if onComplete then
+        tween.Completed:Once(onComplete)
+    end
+    tween:Play()
+end
+
+local function toggleVisibility()
+    isVisible = not isVisible
+    mainFrame.Visible = isVisible
+    toggleVisibilityButton.Text = isVisible and "◐" or "◑"
+end
+
+--// Page and List Update Functions //--
+local function updateDropdownList()
+    for _, child in ipairs(dropdownList:GetChildren()) do
+        if child:IsA("TextButton") then
+            child:Destroy()
+        end
+    end
+
+    local players = Players:GetPlayers()
+    table.sort(players, function(a, b) return a.Name:lower() < b.Name:lower() end)
+
+    for _, player in ipairs(players) do
+        if player ~= Players.LocalPlayer then
+            local playerButton = Instance.new("TextButton")
+            playerButton.Name = player.Name
+            playerButton.Parent = dropdownList
+            playerButton.Size = UDim2.new(1, 0, 0, 25)
+            playerButton.BackgroundColor3 = Color3.fromRGB(60, 60, 75)
+            playerButton.BorderColor3 = Color3.fromRGB(80, 80, 100)
+            playerButton.BorderSizePixel = 1
+            playerButton.Font = Enum.Font.SourceSans
+            playerButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+            playerButton.Text = string.format("%s (%s)", player.DisplayName, player.Name)
+            playerButton.TextSize = 14
+
+            if (dropdownMode == "spectate" and spectatingPlayer and spectatingPlayer.Name == player.Name) or
+               (dropdownMode == "teleport" and teleportingToPlayer and teleportingToPlayer.Name == player.Name) then
+                playerButton.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+            end
+
+            playerButton.MouseButton1Click:Connect(function()
+                if dropdownMode == "spectate" then
+                    if spectatingPlayer and spectatingPlayer == player then
+                        if spectateCharConn then spectateCharConn:Disconnect(); spectateCharConn = nil end
+                        if originalCameraSubject then workspace.CurrentCamera.CameraSubject = originalCameraSubject end
+                        spectatingPlayer, originalCameraSubject = nil, nil
+                        playerButton.BackgroundColor3 = Color3.fromRGB(60, 60, 75)
+                        return
+                    end
+                    if not spectatingPlayer and not originalCameraSubject then originalCameraSubject = workspace.CurrentCamera.CameraSubject end
+                    if spectatingPlayer then
+                        local oldButton = dropdownList:FindFirstChild(spectatingPlayer.Name)
+                        if oldButton then oldButton.BackgroundColor3 = Color3.fromRGB(60, 60, 75) end
+                    end
+                    spectatingPlayer = player
+                    if spectateCharConn then spectateCharConn:Disconnect(); spectateCharConn = nil end
+                    local function setCamToChar(char)
+                        local hum = char:FindFirstChildOfClass("Humanoid") or char
+                        workspace.CurrentCamera.CameraSubject = hum
+                    end
+                    if player.Character then setCamToChar(player.Character) end
+                    spectateCharConn = player.CharacterAdded:Connect(setCamToChar)
+                    playerButton.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+                elseif dropdownMode == "teleport" then
+                    local localChar = Players.LocalPlayer.Character
+                    if not localChar or not localChar:FindFirstChild("HumanoidRootPart") then return end
+                    local localHRP = localChar.HumanoidRootPart
+
+                    if teleportingToPlayer and teleportingToPlayer == player then
+                        if originalPosition then
+                            localHRP.CFrame = originalPosition
+                        end
+                        teleportingToPlayer, originalPosition = nil, nil
+                        playerButton.BackgroundColor3 = Color3.fromRGB(60, 60, 75)
+                        return
+                    end
+                    
+                    local targetChar = player.Character
+                    if targetChar and targetChar:FindFirstChild("HumanoidRootPart") then
+                        local targetHRP = targetChar.HumanoidRootPart
+                        if teleportingToPlayer then
+                            local oldButton = dropdownList:FindFirstChild(teleportingToPlayer.Name)
+                            if oldButton then oldButton.BackgroundColor3 = Color3.fromRGB(60, 60, 75) end
+                        end
+                        if not originalPosition then
+                            originalPosition = localHRP.CFrame
+                        end
+                        localHRP.CFrame = targetHRP.CFrame
+                        teleportingToPlayer = player
+                        playerButton.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+                    end
+                end
+            end)
+        end
+    end
+    dropdownList.CanvasSize = UDim2.new(0, 0, 0, dropdownLayout.AbsoluteContentSize.Y + 9)
+end
+
+local function updateRemoteSpyList()
+    for _, child in ipairs(remoteSpyList:GetChildren()) do if child:IsA("Frame") then child:Destroy() end end
+    
+    local allRemotes = {}
+    for _, remote in ipairs(game:GetDescendants()) do
+        if remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction") then table.insert(allRemotes, remote) end
+    end
+    table.sort(allRemotes, function(a, b) return a:GetFullName() < b:GetFullName() end)
+
+    for _, remote in ipairs(allRemotes) do
+        local remoteFrame = Instance.new("Frame")
+        remoteFrame.Name = remote.Name; remoteFrame.Parent = remoteSpyList
+        remoteFrame.Size = UDim2.new(1, 0, 0, 30)
+        remoteFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 75)
+        remoteFrame.BorderColor3 = Color3.fromRGB(80, 80, 100); remoteFrame.BorderSizePixel = 1
+        
+        local remotePath = remote:GetFullName()
+        local remoteType = remote:IsA("RemoteEvent") and "RE" or "RF"
+
+        local pathLabel = Instance.new("TextLabel")
+        pathLabel.Parent = remoteFrame; pathLabel.Size = UDim2.new(1, -150, 1, 0)
+        pathLabel.Position = UDim2.new(0, 5, 0, 0)
+        pathLabel.BackgroundTransparency = 1; pathLabel.Font = Enum.Font.Code
+        pathLabel.TextColor3 = Color3.fromRGB(200, 200, 210); pathLabel.TextSize = 12
+        pathLabel.TextXAlignment = Enum.TextXAlignment.Left
+        pathLabel.Text = string.format("[%s] %s", remoteType, remotePath)
+        pathLabel.TextTruncate = Enum.TextTruncate.AtEnd
+        
+        local fireButton = Instance.new("TextButton")
+        fireButton.Parent = remoteFrame; fireButton.Size = UDim2.new(0, 50, 1, -6)
+        fireButton.Position = UDim2.new(1, -55, 0, 3)
+        fireButton.BackgroundColor3 = Color3.fromRGB(140, 70, 70)
+        fireButton.BorderColor3 = Color3.fromRGB(170, 100, 100); fireButton.BorderSizePixel = 1
+        fireButton.Font = Enum.Font.SourceSansBold; fireButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+        fireButton.Text = "执行"; fireButton.TextSize = 12
+        fireButton.MouseButton1Click:Connect(function()
+            pcall(function() if remote:IsA("RemoteEvent") then remote:FireServer() else remote:InvokeServer() end end)
+        end)
+        
+        local copyPathButton = Instance.new("TextButton")
+        copyPathButton.Parent = remoteFrame; copyPathButton.Size = UDim2.new(0, 80, 1, -6)
+        copyPathButton.Position = UDim2.new(1, -140, 0, 3)
+        copyPathButton.BackgroundColor3 = Color3.fromRGB(70, 100, 140)
+        copyPathButton.BorderColor3 = Color3.fromRGB(100, 130, 170); copyPathButton.BorderSizePixel = 1
+        copyPathButton.Font = Enum.Font.SourceSansBold; copyPathButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+        copyPathButton.Text = "复制"; copyPathButton.TextSize = 12
+        copyPathButton.MouseButton1Click:Connect(function() setclipboard(remotePath) end)
+    end
+    remoteSpyList.CanvasSize = UDim2.new(0, 0, 0, remoteSpyLayout.AbsoluteContentSize.Y + 9)
+end
+
+local function updateEventSpyList()
+    for _, child in ipairs(eventSpyList:GetChildren()) do if child:IsA("Frame") then child:Destroy() end end
+    
+    local allEvents = {}
+    for _, event in ipairs(game:GetDescendants()) do
+        if event:IsA("BindableEvent") or event:IsA("BindableFunction") then table.insert(allEvents, event) end
+    end
+    table.sort(allEvents, function(a, b) return a:GetFullName() < b:GetFullName() end)
+
+    for _, event in ipairs(allEvents) do
+        local eventFrame = Instance.new("Frame")
+        eventFrame.Name = event.Name; eventFrame.Parent = eventSpyList
+        eventFrame.Size = UDim2.new(1, 0, 0, 30)
+        eventFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 75)
+        eventFrame.BorderColor3 = Color3.fromRGB(80, 80, 100); eventFrame.BorderSizePixel = 1
+        
+        local eventPath = event:GetFullName()
+        local eventType = event:IsA("BindableEvent") and "BE" or "BF"
+
+        local pathLabel = Instance.new("TextLabel")
+        pathLabel.Parent = eventFrame; pathLabel.Size = UDim2.new(1, -150, 1, 0)
+        pathLabel.Position = UDim2.new(0, 5, 0, 0)
+        pathLabel.BackgroundTransparency = 1; pathLabel.Font = Enum.Font.Code
+        pathLabel.TextColor3 = Color3.fromRGB(200, 200, 210); pathLabel.TextSize = 12
+        pathLabel.TextXAlignment = Enum.TextXAlignment.Left
+        pathLabel.Text = string.format("[%s] %s", eventType, eventPath)
+        pathLabel.TextTruncate = Enum.TextTruncate.AtEnd
+        
+        local fireButton = Instance.new("TextButton")
+        fireButton.Parent = eventFrame; fireButton.Size = UDim2.new(0, 50, 1, -6)
+        fireButton.Position = UDim2.new(1, -55, 0, 3)
+        fireButton.BackgroundColor3 = Color3.fromRGB(140, 70, 70)
+        fireButton.BorderColor3 = Color3.fromRGB(170, 100, 100); fireButton.BorderSizePixel = 1
+        fireButton.Font = Enum.Font.SourceSansBold; fireButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+        fireButton.Text = "执行"; fireButton.TextSize = 12
+        fireButton.MouseButton1Click:Connect(function()
+            pcall(function() if event:IsA("BindableEvent") then event:Fire() else event:Invoke() end end)
+        end)
+        
+        local copyPathButton = Instance.new("TextButton")
+        copyPathButton.Parent = eventFrame; copyPathButton.Size = UDim2.new(0, 80, 1, -6)
+        copyPathButton.Position = UDim2.new(1, -140, 0, 3)
+        copyPathButton.BackgroundColor3 = Color3.fromRGB(70, 100, 140)
+        copyPathButton.BorderColor3 = Color3.fromRGB(100, 130, 170); copyPathButton.BorderSizePixel = 1
+        copyPathButton.Font = Enum.Font.SourceSansBold; copyPathButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+        copyPathButton.Text = "复制"; copyPathButton.TextSize = 12
+        copyPathButton.MouseButton1Click:Connect(function() setclipboard(eventPath) end)
+    end
+    eventSpyList.CanvasSize = UDim2.new(0, 0, 0, eventSpyLayout.AbsoluteContentSize.Y + 9)
+end
+
+function setActivePage(pageName)
+    if pageName == "spectate" or pageName == "teleport" then dropdownMode = pageName; updateDropdownList() end
+    if pageName == "remote" then updateRemoteSpyList() end
+    if pageName == "event" then updateEventSpyList() end
+    activePage = pageName
+    for name, page in pairs(pages) do page.Visible = (page.Name == pages[pageName].Name) end
+    for name, button in pairs(buttons) do button.BackgroundColor3 = (name == pageName) and Color3.fromRGB(90, 110, 140) or Color3.fromRGB(70, 70, 90) end
+    
+    if pageName == "chat" and isAtBottom then
+        unreadMessages = 0
+        unreadBadge.Visible = false
+        firstUnreadMessageFrame = nil
+    elseif unreadMessages > 0 then
+        unreadBadge.Visible = true
+    else
+        unreadBadge.Visible = false
+    end
+end
+
+--// Logging Functions //--
+local function logMessage(player, message)
+    local DELETE_BTN_WIDTH = 20
+    local PADDING = 5
+
+    local msgFrame = Instance.new("Frame")
+    msgFrame.Name = "MsgFrame"; msgFrame.Parent = logContainer
+    msgFrame.Size = UDim2.new(1, 0, 0, 0); msgFrame.BackgroundTransparency = 1
+    msgFrame.AutomaticSize = Enum.AutomaticSize.Y
+
+    local deleteButton = Instance.new("TextButton")
+    deleteButton.Name = "DeleteButton"
+    deleteButton.Parent = msgFrame
+    deleteButton.Size = UDim2.new(0, DELETE_BTN_WIDTH, 0, DELETE_BTN_WIDTH)
+    deleteButton.AnchorPoint = Vector2.new(1, 0)
+    deleteButton.Position = UDim2.new(1, 0, 0, 0)
+    deleteButton.BackgroundTransparency = 1
+    deleteButton.BorderSizePixel = 0
+    deleteButton.Font = Enum.Font.SourceSansBold
+    deleteButton.TextColor3 = Color3.fromRGB(200, 90, 90)
+    deleteButton.Text = "x"
+    deleteButton.TextSize = 16
+
+    local combinedLabel = Instance.new("TextLabel")
+    combinedLabel.Name = "CombinedLabel"; combinedLabel.Parent = msgFrame
+    combinedLabel.Size = UDim2.new(1, -(DELETE_BTN_WIDTH + PADDING), 0, 0)
+    combinedLabel.AutomaticSize = Enum.AutomaticSize.Y
+    combinedLabel.BackgroundTransparency = 1; combinedLabel.Font = Enum.Font.SourceSans
+    combinedLabel.TextColor3 = Color3.fromRGB(230, 230, 230); combinedLabel.TextSize = 14
+    combinedLabel.TextWrapped = true; 
+    combinedLabel.TextXAlignment = Enum.TextXAlignment.Left
+    combinedLabel.TextYAlignment = Enum.TextYAlignment.Top
+    combinedLabel.RichText = true
+    combinedLabel.Text = string.format("<font color='rgb(120, 190, 255)'><b>%s:</b></font> %s", player.Name:gsub("<", "&lt;"), message:gsub("<", "&lt;"))
+
+    deleteButton.MouseButton1Click:Connect(function()
+        msgFrame:Destroy()
+        task.wait()
+        logContainer.CanvasSize = UDim2.new(0, 0, 0, uiListLayout.AbsoluteContentSize.Y + 9)
+        
+        if logContainer.CanvasSize.Y.Offset <= logContainer.AbsoluteSize.Y then
+            isAtBottom = true
+            if unreadMessages > 0 then
+                unreadMessages = 0
+                unreadBadge.Visible = false
+                firstUnreadMessageFrame = nil
+            end
+        end
+    end)
+
+    msgFrame.Parent = logContainer
+    msgFrame.LayoutOrder = tick()
+    
+    logContainer.CanvasSize = UDim2.new(0, 0, 0, uiListLayout.AbsoluteContentSize.Y + 9)
+    
+    if not isCollapsed and isAtBottom and activePage == "chat" then
+        logContainer.CanvasPosition = Vector2.new(0, logContainer.CanvasSize.Y.Offset)
+        firstUnreadMessageFrame = nil
+    else
+        if not firstUnreadMessageFrame or not firstUnreadMessageFrame.Parent then
+            firstUnreadMessageFrame = msgFrame
+        end
+        unreadMessages = unreadMessages + 1
+        unreadBadge.Text = tostring(unreadMessages)
+        unreadBadge.Visible = true
+    end
+end
+
+local function logHttpRequest(...)
+    local parts = {...}
+    local fullMessage = table.concat(parts, " ")
+
+    local logLabel = Instance.new("TextLabel")
+    logLabel.Name = "HttpLogEntry"
+    logLabel.Parent = httpSpyPage
+    logLabel.Size = UDim2.new(1, 0, 0, 0)
+    logLabel.AutomaticSize = Enum.AutomaticSize.Y
+    logLabel.BackgroundTransparency = 1
+    logLabel.Font = Enum.Font.Code
+    logLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+    logLabel.Text = fullMessage
+    logLabel.TextSize = 12
+    logLabel.TextWrapped = true
+    logLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+    task.wait() 
+    httpSpyPage.CanvasSize = UDim2.new(0, 0, 0, httpSpyLayout.AbsoluteContentSize.Y + 9)
+end
+
+--// HTTP SPY CORE LOGIC //--
+local Hook = {}
+local Http = {}
+
+--// Config
+local UrlIntercepts = {
+	["http://127.0.0.1:6463/rpc?v=1"] = {
+        Callback = function()
+            warn("Blocked discord inivite!")
+            return ""
+        end,
+    },
+}
+
+local function HttpCallback(OldFunc, ...)
+    local Args = {...}
+
+	local Request = Http:ScanHTTPRequest(Args)
+    if not Request then return end
+
+    local IsPost = Request.IsPost
+	local IsTable = Request.IsTable
+	local Url = Request.Url
+	local Body = Request.Body
+	local Headers = Request.Headers
+
+	if not Url then
+        return OldFunc(...)
+    end
+
+    logHttpRequest(string.format("[%s]: %s", IsPost and "POST" or "GET", Url))
+
+    if Body then
+        logHttpRequest(string.format("> [Body] %s", tostring(Body)))
+    end
+	if Headers then
+		logHttpRequest(string.format("> [Headers] %s", HttpService:JSONEncode(Headers)))
+	end
+
+    local Responce = nil
+    local Intercept = Http:FindIntercept(Url)
+
+    if not Intercept or Intercept.PassResponce then
+        local s, r = pcall(OldFunc, ...)
+        if not s then warn("HTTP Error:", r) end
+        Responce = r
+    end
+
+    if not Intercept then return Responce end
+
+    local Spoofed = Intercept.Callback
+	
+    if Typeof(Spoofed) == "function" then
+        if Intercept.PassResponce then
+            Spoofed = Spoofed(Responce, Request)
+        else
+            Spoofed = Spoofed(Request)
+        end
+    end
+
+    if IsTable then
+		local Base = Responce or {}
+		return Hook:Hook(Base, {
+			["Body"] = Spoofed
+		})
+    end
+
+	return Spoofed
+end
+
+function Http:ScanHTTPRequest(Args: {})
+	local Request = {}
+
+	for Index: number, Arg in next, Args do
+		if Typeof(Arg) == "string" then
+			Request.Url = Arg
+			break
+		elseif Typeof(Arg) == "table" then
+			local Url = Arg.Url or Arg.url
+			if not Url then continue end
+
+			local Body = Arg.Body or Arg.body
+			Request.Url = Url
+			Request.Body = Body
+			Request.IsPost = Body and true or false
+			Request.IsTable = true
+			Request.Headers = Arg.Headers
+			break
+		end
+	end
+	return Request
+end
+
+function Http:FindIntercept(Url: string)
+    for UrlMatch, Data in next, UrlIntercepts do
+        if Url:match(UrlMatch) then 
+            return Data 
+        end
+    end
+	return
+end
+
+Hook.Hooks = {}
+Hook.Cache = setmetatable({}, {__mode = "k"})
+Hook.Alliases = {
+    ["HTTP_HOOK"] = HttpCallback
+}
+
+function Hook:GetHooks() return self.Hooks end
+function Hook:IsObject(Object: Instance?) return Typeof(Object) == "Instance" end
+function Hook:GetHooksForObject(Instance) return self.Hooks[Instance] end
+function Hook:AddRefernce(Instance, Hooks) if not Instance then return end self.Hooks[Instance] = Hooks end
+function Hook:GetCached(Instance) return self.Cache[Instance] end
+function Hook:AddCached(Instance, Proxy) self.Cache[Instance] = Proxy end
+
+function Hook:Hook(Object: Instance, Hooks: table)
+	local Cached = self:GetCached(Object)
+	if Cached then return Cached end
+	
+	local Proxy = newproxy(true)
+	local Meta = getmetatable(Proxy)
+
+	Meta.__index = function(self, Key: string)
+		local Hook = Hooks[Key]
+		if Hook then return Hook end
+        local Value = Object[Key]
+		if type(Value) == "function" then
+			return function(self, ...)
+				return Value(Object, ...)
+			end
+		end
+		return Value
+	end
+	Meta.__newindex = function(self, Key: string, New) Object[Key] = New end
+	Meta.__tostring = function() return tostring(Object) end
+    Meta.__metatable = getmetatable(Object)
+    self:AddCached(Object, Proxy)
+	return Proxy
+end
+
+function Hook:ApplyHooks()
+	local AllHooks = self:GetHooks()
+	local Alliases = self.Alliases
+
+	for Object, Data in next, AllHooks do
+		local IsObject = self:IsObject(Object)
+		local Hooks = Data.Hooks
+		local Globals = Data.Globals
+
+		local IsReadOnly = false
+		if typeof(Object) == "table" then IsReadOnly = table.isfrozen(Object) end
+		if IsReadOnly then setreadonly(Object, false) end
+
+		for Key: string, Value in next, Hooks do
+			local Success, OldValue = pcall(function() return Object[Key] end)
+			if not Success then continue end
+			
+			if Typeof(OldValue) == "function" then
+				if IsObject then
+					local OldFunc = OldValue
+					OldValue = function(self, ...) return OldFunc(Object, ...) end
+				end
+				if iscclosure(OldValue) then OldValue = newcclosure(OldValue) end
+			end
+
+			if typeof(Value) == "string" then
+				local Callback = Alliases[Value]
+				if Callback then
+					Value = function(...) return Callback(OldValue, ...) end
+				end
+			end
+			Hooks[Key] = Value
+			if not IsObject then Object[Key] = Value end
+		end
+
+		if IsObject then
+			local Proxy = self:Hook(Object, Hooks)
+			if Globals then
+				for _, Global: string in next, Globals do GlobalENV[Global] = Proxy end
+			end
+		elseif IsReadOnly then
+			setreadonly(Object, true) 
+		end
+	end
+end
+
+local function AddHooks()
+    Hook:AddRefernce(game, {
+		Globals = {"game", "Game"},
+		Hooks = {
+			["HttpGet"] = "HTTP_HOOK",
+			["HttpGetAsync"] = "HTTP_HOOK",
+			["HttpPost"] = "HTTP_HOOK",
+			["HttpPostAsync"] = "HTTP_HOOK"
+		}
+	})
+    Hook:AddRefernce(GlobalENV, { Hooks = { ["http_request"] = "HTTP_HOOK", ["request"] = "HTTP_HOOK" } })
+    Hook:AddRefernce(http, { Hooks = { ["request"] = "HTTP_HOOK" } })
+    Hook:AddRefernce(syn, { Hooks = { ["request"] = "HTTP_HOOK" } })
+end
+
+--// Setup Hooks & Connections //--
+TextChatService.OnIncomingMessage = function(message)
+    if message.TextSource then
+        local p = Players:GetPlayerByUserId(message.TextSource.UserId)
+        if p and p ~= Players.LocalPlayer then logMessage(p, message.Text) end
+    end
+end
+TextChatService.SendingMessage:Connect(function(msg) logMessage(Players.LocalPlayer, msg.Text) end)
+
+--// Draggable Top Bar //--
+topBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        local startPos, frameStartPos = input.Position, mainFrame.Position
+        local moveConn, upConn
+        moveConn = UserInputService.InputChanged:Connect(function(c) if c.UserInputType == Enum.UserInputType.MouseMovement or c.UserInputType == Enum.UserInputType.Touch then local d = c.Position - startPos; mainFrame.Position = UDim2.new(frameStartPos.X.Scale, frameStartPos.X.Offset + d.X, frameStartPos.Y.Scale, frameStartPos.Y.Offset + d.Y) end end)
+        upConn = UserInputService.InputEnded:Connect(function(e) if e.UserInputType == Enum.UserInputType.MouseButton1 or e.UserInputType == Enum.UserInputType.Touch then moveConn:Disconnect(); upConn:Disconnect() end end)
+    end
+end)
+
+--// Main Button Connections //--
+collapseButton.MouseButton1Click:Connect(function() toggleCollapse() end)
+toggleVisibilityButton.MouseButton1Click:Connect(toggleVisibility)
+
+clearLogsButton.MouseButton1Click:Connect(function()
+    if unreadMessages > 0 then
+        local function scrollToMessage()
+            setActivePage("chat")
+            if firstUnreadMessageFrame and firstUnreadMessageFrame.Parent then
+                task.wait() -- Allow UI to update before calculating position
+                local targetY = firstUnreadMessageFrame.AbsolutePosition.Y - logContainer.AbsolutePosition.Y - 5
+                TweenService:Create(logContainer, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CanvasPosition = Vector2.new(0, targetY)}):Play()
+            end
+        end
+
+        if isCollapsed then
+            toggleCollapse(scrollToMessage)
+        else
+            scrollToMessage()
+        end
+    else
+        clearAllLogs()
+    end
+end)
+
+chatButton.MouseButton1Click:Connect(function() setActivePage("chat") end)
+spectateButton.MouseButton1Click:Connect(function() setActivePage("spectate") end)
+teleportButton.MouseButton1Click:Connect(function() setActivePage("teleport") end)
+remoteSpyButton.MouseButton1Click:Connect(function() setActivePage("remote") end)
+eventSpyButton.MouseButton1Click:Connect(function() setActivePage("event") end)
+httpSpyButton.MouseButton1Click:Connect(function() setActivePage("http") end)
+
+--// Input Handling //--
+UserInputService.InputBegan:Connect(function(input, processed)
+    if not processed and input.KeyCode == Enum.KeyCode.RightControl then toggleVisibility() end
+end)
+
+--// Handle Local Player Death to reset states //--
+local function onCharacterAdded(character)
+    local humanoid = character:WaitForChild("Humanoid")
+    humanoid.Died:Connect(function()
+        if spectatingPlayer then
+            if spectateCharConn then spectateCharConn:Disconnect(); spectateCharConn = nil end
+            spectatingPlayer, originalCameraSubject = nil, nil
+        end
+        if teleportingToPlayer then teleportingToPlayer, originalPosition = nil, nil end
+        if activePage == "spectate" or activePage == "teleport" then updateDropdownList() end
+    end)
+end
+
+if Players.LocalPlayer.Character then onCharacterAdded(Players.LocalPlayer.Character) end
+Players.LocalPlayer.CharacterAdded:Connect(onCharacterAdded)
+
+Players.PlayerAdded:Connect(function() 
+    if activePage == "spectate" or activePage == "teleport" then updateDropdownList() end 
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    if spectatingPlayer == player then
+        if originalCameraSubject then workspace.CurrentCamera.CameraSubject = originalCameraSubject end
+        spectatingPlayer, originalCameraSubject = nil, nil
+    end
+    if teleportingToPlayer == player then
+        if originalPosition and Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            Players.LocalPlayer.Character.HumanoidRootPart.CFrame = originalPosition
+        end
+        teleportingToPlayer, originalPosition = nil, nil
+    end
+    if activePage == "spectate" or activePage == "teleport" then updateDropdownList() end
+end)
+
+logContainer:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
+    local scrollPos = logContainer.CanvasPosition.Y
+    isAtBottom = (scrollPos + logContainer.AbsoluteSize.Y) >= (logContainer.CanvasSize.Y.Offset - 5)
+    if isAtBottom then
+        unreadMessages = 0
+        unreadBadge.Visible = false
+        firstUnreadMessageFrame = nil
+    end
+end)
+
+--// Initial State //--
+AddHooks()
+Hook:ApplyHooks()
+logHttpRequest("HTTP Spy loaded successfully!")
+setActivePage("chat")

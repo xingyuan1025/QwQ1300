@@ -1,0 +1,97 @@
+--// RTX Lite Shader - Enhanced Bloom Edition by slimefrog 
+local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+
+-- Clear previous post effects
+for _, v in ipairs(Lighting:GetChildren()) do
+    if v:IsA("PostEffect") then
+        v:Destroy()
+    end
+end
+
+-- Stronger Bloom Effect
+local function addBloom()
+    local bloom = Instance.new("BloomEffect")
+    bloom.Intensity = 1.5      -- Increased brightness
+    bloom.Threshold = 0.8      -- Lowered so more lights glow
+    bloom.Size = 64            -- Wider glow
+    bloom.Parent = Lighting
+end
+
+-- Day Mode
+local function applyDay()
+    Lighting.ClockTime = 14
+    Lighting.Brightness = 3
+    Lighting.Ambient = Color3.fromRGB(170, 170, 170)
+    Lighting.OutdoorAmbient = Color3.fromRGB(210, 210, 210)
+    Lighting.FogStart = 300
+    Lighting.FogEnd = 1000
+    Lighting.FogColor = Color3.fromRGB(255, 245, 230)
+    addBloom()
+    print("RTX Day Mode (Strong Bloom) Applied.")
+end
+
+-- Night Mode
+local function applyNight()
+    Lighting.ClockTime = 0
+    Lighting.Brightness = 2
+    Lighting.Ambient = Color3.fromRGB(50, 50, 80)
+    Lighting.OutdoorAmbient = Color3.fromRGB(30, 30, 60)
+    Lighting.FogStart = 200
+    Lighting.FogEnd = 800
+    Lighting.FogColor = Color3.fromRGB(15, 15, 30)
+    addBloom()
+    print("RTX Night Mode (Strong Bloom) Applied.")
+end
+
+-- Toggle Logic
+local isDay = true
+local function toggleMode()
+    for _, v in ipairs(Lighting:GetChildren()) do
+        if v:IsA("PostEffect") then
+            v:Destroy()
+        end
+    end
+
+    if isDay then
+        applyNight()
+    else
+        applyDay()
+    end
+    isDay = not isDay
+end
+
+-- PC Keybind: L to toggle
+UIS.InputBegan:Connect(function(input, gp)
+    if not gp and input.KeyCode == Enum.KeyCode.L then
+        toggleMode()
+    end
+end)
+
+-- Mobile Touch Button
+local function createMobileButton()
+    local player = Players.LocalPlayer
+    local playerGui = player:WaitForChild("PlayerGui")
+
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "RTX_Toggle_UI"
+    gui.ResetOnSpawn = false
+    gui.Parent = playerGui
+
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 140, 0, 40)
+    button.Position = UDim2.new(0.02, 0, 0.9, 0)
+    button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 16
+    button.Text = "切换 模式"
+    button.Parent = gui
+
+    button.MouseButton1Click:Connect(toggleMode)
+end
+
+-- Start with Day Mode
+applyDay()
+createMobileButton()

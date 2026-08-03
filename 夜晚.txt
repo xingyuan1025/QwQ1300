@@ -1,0 +1,55 @@
+local Lighting = game:GetService("Lighting")
+Lighting.ClockTime = 20.2
+Lighting.FogEnd = 800
+Lighting.FogStart = 100
+Lighting.FogColor = Color3.fromRGB(20, 20, 35)
+Lighting.Ambient = Color3.fromRGB(50, 50, 65)
+Lighting.OutdoorAmbient = Color3.fromRGB(35, 35, 50)
+Lighting.Brightness = 1
+Lighting.EnvironmentDiffuseScale = 0.5
+Lighting.EnvironmentSpecularScale = 0.25
+Lighting.GlobalShadows = true
+Lighting.ExposureCompensation = 0.2
+for _, v in pairs(Lighting:GetChildren()) do
+    if v:IsA("PostEffect") or v:IsA("Sky") then
+        v:Destroy()
+    end
+end
+local sky = Instance.new("Sky")
+sky.Name = "CinematicNightSky"
+sky.SkyboxBk = "rbxassetid://401664839" 
+sky.SkyboxDn = "rbxassetid://401664862" 
+sky.SkyboxFt = "rbxassetid://401664960" 
+sky.SkyboxLf = "rbxassetid://401665016" 
+sky.SkyboxRt = "rbxassetid://401665079" 
+sky.SkyboxUp = "rbxassetid://401665129" 
+sky.StarCount = 3000
+sky.SunAngularSize = 0
+sky.MoonAngularSize = 11
+sky.CelestialBodiesShown = true
+sky.Parent = Lighting
+local cc = Instance.new("ColorCorrectionEffect")
+cc.Name = "CinematicFix"
+cc.Brightness = 0.05
+cc.Contrast = 0.4
+cc.Saturation = -0.15
+cc.TintColor = Color3.fromRGB(150, 170, 230)
+cc.Parent = Lighting
+local bloom = Instance.new("BloomEffect")
+bloom.Intensity = 0.25
+bloom.Size = 15
+bloom.Threshold = 1
+bloom.Parent = Lighting
+local dof = Instance.new("DepthOfFieldEffect")
+dof.FarIntensity = 0.03
+dof.FocusDistance = 85
+dof.InFocusRadius = 120
+dof.NearIntensity = 0.03
+dof.Parent = Lighting
+local rays = Instance.new("SunRaysEffect")
+rays.Intensity = 0.012
+rays.Spread = 0.75
+rays.Parent = Lighting
+local blur = Instance.new("BlurEffect")
+blur.Size = 4
+blur.Parent = Lighting

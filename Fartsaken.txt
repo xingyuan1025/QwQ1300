@@ -1,0 +1,411 @@
+-----不加密了二改可以别删这个注释我的b站UID:1531514159
+local Translations = {
+    ["Fartsaken"] = "Kenny汉化",
+    ["Toggle"] = "切换",
+    ["Lock"] = "锁定",
+    ["Home"] = "主页",
+    ["Visuals"] = "视觉效果",
+    ["Generators"] = "发电机",
+    ["Player"] = "玩家",
+    ["Misc"] = "杂项",
+    ["Rage"] = "狂怒",
+    ["Profile"] = "个人资料",
+    ["Developers"] = "开发者",
+    ["[ivannetta] - Owner"] = "[Kenny] - 汉化",
+    ["[unionoperation] - Developer"] = "[UID:1531514159] - b站",
+    ["Contributors"] = "关注我",
+    ["[upio] - Helped with Optimization"] = "我的b站UID:1531514159",
+    ["[Dottik] - Helper with Generators"] = "我的b站UID:1531514159",
+    ["Information"] = "信息",
+    ["Welcome to Fartsaken, Have fun!"] = "欢迎来到Fartsaken，祝你玩得开心！",
+    ["Script is updated"] = "关注我我的b站UID:1531514159",
+    ["ESP and other visuals."] = "ESP和其他视觉效果。",
+    ["Inventory"] = "库存",
+    ["Text Size"] = "文本大小",
+    ["Text Font"] = "文本字体",
+    ["Healthy Color"] = "健康颜色",
+    ["Dying Color"] = "濒死颜色",
+    ["Health Bars"] = "生命条",
+    ["3D Boxes"] = "3D框",
+    ["2D Boxes"] = "2D框",
+    ["World"] = "世界",
+    ["Disable Blur"] = "禁用模糊",
+    ["Full Bright"] = "全亮",
+    ["Self"] = "自我",
+    ["Effects"] = "效果",
+    ["Remove Health Glitch"] = "移除生命故障",
+    ["Delete John Doe's Footprint"] = "删除John Doe的足迹",
+    ["Tracers"] = "追踪器",
+    ["Tracer Start Position"] = "追踪器起始位置",
+    ["Top"] = "顶部",
+    ["Middle"] = "中间",
+    ["Bottom"] = "底部",
+    ["Arrow Radius"] = "箭头半径",
+    ["AlwaysOnTop"] = "始终置顶",
+    ["Names"] = "名称",
+    ["Distance"] = "距离",
+    ["Offscreen Arrows"] = "屏幕外箭头",
+    ["Arrow Size"] = "箭头大小",
+    ["Outline Transparency"] = "轮廓透明度",
+    ["Fill Transparency"] = "填充透明度",
+    ["Chams Depth Mode"] = "Chams深度模式",
+    ["Items"] = "物品",
+    ["Minions"] = "小兵",
+    ["Projectile"] = "投射物",
+    ["Traps"] = "陷阱",
+    ["Princess Mode"] = "公主模式",
+    ["Field of View"] = "视野",
+    ["Chains debug mode"] = "链条调试模式",
+    ["Occluded"] = "被遮挡",
+    ["Auto Solve Generators and other generator stuff."] = "自动解决发电机和其他发电机内容。",
+    ["Auto Generator"] = "自动发电机",
+    ["Settings"] = "设置",
+    ["Auto Solve Generator"] = "自动解决发电机",
+    ["Generator Helper"] = "发电机助手",
+    ["Generator Backgrounds"] = "发电机背景",
+    ["Background Video."] = "背景视频。",
+    ["Subway Surfers"] = "地铁跑酷",
+    ["Video Volume"] = "视频音量",
+    ["Generator Solve Delay"] = "发电机解决延迟",
+    ["Generator Delay Randomness"] = "发电机延迟随机性",
+    ["Player Character Functions"] = "玩家角色功能",
+    ["Speed"] = "速度",
+    ["Stamina"] = "耐力",
+    ["Actions"] = "动作",
+    ["Abilities"] = "能力",
+    ["Walkspeed Multiplier"] = "行走速度倍数",
+    ["Walkspeed Type"] = "行走速度类型",
+    ["Blatant"] = "明显",
+    ["Legit"] = "合法",
+    ["Disable Slowness Modifiers"] = "禁用减速修改器",
+    ["Ragdoll"] = "布娃娃",
+    ["Frontflip"] = "前空翻",
+    ["Chance Feet"] = "机会脚",
+    ["Orion"] = "猎户座",
+    ["Baby Fucking Dies"] = "婴儿他妈的死了",
+    ["Black Sigma"] = "黑色西格玛",
+    ["Tuff roblox story"] = "坚韧的Roblox故事",
+    ["Chicken"] = "鸡",
+    ["Skibidi"] = "斯基比迪",
+    ["Horse"] = "马",
+    ["Workink"] = "工作狂",
+    ["Hero Gangam"] = "英雄帮帮",
+    ["Minecraft Parkour"] = "我的世界跑酷",
+    ["Family Guy"] = "恶搞之家",
+    ["CS2"] = "CS2",
+    ["Necromancy"] = "死灵术",
+    ["Hairy Twinkle"] = "毛茸茸的闪烁",
+    ["Pistonboor"] = "活塞钻",
+    ["Oh My Boy"] = "哦我的男孩",
+    ["Endrake"] = "终极龙",
+    ["Nintendo Memes"] = "任天堂梗",
+    ["Total Extermination"] = "彻底灭绝",
+    ["Foot Surf"] = "脚冲浪",
+    ["Geeked Dash"] = "极客冲刺",
+    ["Horn"] = "喇叭",
+    ["Mango Tree"] = "芒果树",
+    ["Dooh"] = "杜赫",
+    ["Quiz"] = "测验",
+    ["Sleep Honk"] = "睡眠喇叭",
+    ["So Sigma Rawr"] = "如此西格玛吼叫",
+    ["Viral Mango Icecream"] = "病毒芒果冰淇淋",
+    ["Good Choice"] = "好选择",
+    ["Whats Going On"] = "发生了什么",
+    ["Paint Best"] = "最佳绘画",
+    ["I Wanna run away"] = "我想逃跑",
+    ["Random"] = "随机",
+    ["Adds video backgrounds to generators."] = "为发电机添加视频背景。",
+    ["Note: Stamina changes apply after round ends"] = "注意：耐力变更在回合结束后生效",
+    ["Infinite Stamina"] = "无限耐力",
+    ["Stamina Gain Speed"] = "耐力恢复速度",
+    ["Max Stamina"] = "最大耐力",
+    ["Invisibility"] = "隐身",
+    ["Better Noli Controls"] = "更好的诺利控制",
+    ["Miscellaneous functions and utilities."] = "杂项功能和实用工具。",
+    ["General"] = "通用",
+    ["UI"] = "用户界面",
+    ["Visibility"] = "可见性",
+    ["Device"] = "设备",
+    ["Streamer Mode"] = "主播模式",
+    ["Show Hidden Stats"] = "显示隐藏统计",
+    ["Delete Killer Only Walls"] = "仅删除杀手墙壁",
+    ["Anti Features"] = "反作弊功能",
+    ["Anti Auto 404"] = "反自动404",
+    ["Anti Autobl ock"] = "反自动屏蔽",
+    ["Toggle Chat Visibility"] = "切换聊天可见性",
+    ["Spoof Device"] = "伪装设备",
+    ["PC"] = "电脑",
+    ["Mobile"] = "移动设备",
+    ["Console"] = "游戏机",
+    ["UI Settings"] = "UI 设置",
+    ["UI Timer Position"] = "UI 计时器位置",
+    ["TopBar Buttons"] = "顶部栏按钮",
+    ["Frontflip, Fake Block"] = "前空翻，假块",
+    ["Nightlight"] = "夜灯",
+    ["Rage functions for competitive play"] = "用于竞技玩法的狂怒功能",
+    ["Misc Rage Functions"] = "杂项狂怒功能",
+    ["Auto Screen Popups"] = "自动屏幕弹窗",
+    ["Anti Reach"] = "反伸手",
+    ["Shedletsky Fling Sword"] = "舍德莱茨基投掷剑",
+    ["Reach"] = "伸手",
+    ["Reach Characters"] = "伸手角色",
+    ["Slasher, c00lkidd, Nol"] = "屠夫，c00lkidd，诺尔",
+    ["Reach Distance"] = "伸手距离",
+    ["Reach Prediction"] = "伸手预测",
+    ["Reach Strength"] = "伸手强度",
+    ["Reach Delay"] = "伸手延迟",
+    ["TwoTime, Guest137, Ch"] = "双倍时间，访客137，Ch",
+    ["Shedletsky"] = "舍德莱茨基",
+    ["Elliot"] = "埃利奥特",
+    ["Noli"] = "诺利",
+    ["JohnDoe"] = "约翰·多伊",
+    ["Slasher"] = "屠夫",
+    ["Assistance features"] = "辅助功能",
+    ["Aimbot"] = "瞄准机器人",
+    ["Silent Aim"] = "静默瞄准",
+    ["TwoTime Look Same Direction"] = "双倍时间看向同一方向",
+    ["Aimbot Characters"] = "瞄准机器人角色",
+    ["c00lkidd, Dusekkar, Noli"] = "c00lkidd，杜塞卡尔，诺利",
+    ["Chance"] = "几率",
+    ["TwoTime"] = "双倍时间",
+    ["Guest137"] = "访客137",
+    ["Aiming"] = "瞄准",
+    ["Autoblock"] = "自动格挡",
+    ["Music"] = "音乐",
+    ["Silent Aim Characters"] = "静默瞄准角色",
+    ["Dusekkar"] = "杜塞卡尔",
+    ["Nol"] = "诺尔",
+    ["Aim bot and aiming assistance features"] = "瞄准机器人和瞄准辅助功能",
+    ["TwoTime, Guest137, Ch.."] = "双倍时间，访客137，Ch..",
+    ["c00lkidd"] = "c00lkidd",
+    ["circle or the closest to you."] = "圆圈内或最接近你的。",
+    ["Aimbot Priority"] = "自瞄优先级",
+    ["Nearest"] = "最近的",
+    ["Closest To Cursor"] = "最接近光标",
+    ["Silent Aim Prediction Strength"] = "静默瞄准预测强度",
+    ["Duskkar Aim Target"] = "Duskkar 瞄准目标",
+    ["Killer"] = "杀手",
+    ["Duskkar Wallbang"] = "Duskkar 穿墙",
+    ["FOV Circle Radius"] = "FOV 圆圈半径",
+    ["FOV Circle Transparency"] = "FOV 圆圈透明度",
+    ["FOV Circle Color"] = "FOV 圆圈颜色",
+    ["Character Aimbot"] = "角色自瞄",
+    ["Camera Aimbot"] = "镜头自瞄",
+    ["Block Projectiles"] = "格挡投射物",
+    ["Survivor Autoblock"] = "幸存者自动格挡",
+    ["Killer Autoblock"] = "杀手自动格挡",
+    ["Autoblock Hitbox Multiplier"] = "自动格挡命中框倍数",
+    ["Autoblock Hitbox Transparency"] = "自动格挡命中框透明度",
+    ["AB Hitbox Color"] = "AB 命中框颜色",
+    ["Autoblock Delay"] = "自动格挡延迟",
+    ["Autoblock Characters"] = "自动格挡角色",
+    ["Custom music for lobby and last man standing"] = "大厅和最后幸存者自定义音乐",
+    ["Enable Custom LMS Music"] = "启用自定义 LMS 音乐",
+    ["Enable Custom Lobby Music"] = "启用自定义大厅音乐",
+    ["Enable Custom Chase Music"] = "启用自定义追逐音乐",
+    ["Enter that download link in the first text box below."] = "在下面的第一个文本框中输入该下载链接。",
+    ["Choose a name for your song and add the file extension."] = "为您的歌曲选择名称并添加文件扩展名。",
+    ["Example: 'My EVIL Song.mp3'"] = "示例：'My EVIL Song.mp3'",
+    ["IMPORTANT: You MUST include the file extension (.mp3, .wav, etc.)"] = "重要：您必须包含文件扩展名 (.mp3, .wav 等)",
+    ["How To Get Custom Sounds:"] = "如何获取自定义声音：",
+    ["1. Upload your music file to a platform like Discord or any file hosting service."] = "1. 将您的音乐文件上传到像 Discord 这样的平台或任何文件托管服务。",
+    ["2. Get the direct download link to your file (must be a RAW file link, not a YouTube link)."] = "2. 获取您文件的直接下载链接（必须是 RAW 文件链接，不是 YouTube 链接）。",
+    ["Main"] = "主要",
+    ["Config"] = "配置",
+    ["Hitbox"] = "命中框",
+    ["Characters"] = "角色",
+    ["Automatically block incoming attacks"] = "自动格挡传入攻击",
+    ["Search"] = "搜索",
+    ["Hitbox Preview"] = "命中框预览",
+    ["Custom"] = "自定义",
+    ["Manage"] = "管理",
+    ["Aimbot Prediction"] = "自瞄预测",
+    ["Aimbot Rotation Speed"] = "自瞄旋转速度",
+    ["Aimbot Max Distance"] = "自瞄最大距离",
+    ["OK"] = "确定",
+    ["Cancel"] = "取消",
+    ["Survivor"] = "幸存者",
+    ["Block"] = "格挡",
+    ["Incoming attacks"] = "传入攻击",
+    ["Automatically blocks"] = "自动格挡",
+    ["Preview"] = "预览",
+    ["Last man standing"] = "最后幸存者",
+    ["Autoblock Hitbox"] = "自动格挡命中框",
+    ["Aimbot Type"] = "自瞄类型",
+    ["FOV Circle"] = "FOV 圆圈",
+    ["Green"] = "绿色",
+    ["Purple"] = "紫色",
+    ["Custom Manage"] = "自定义管理",
+    ["Autoblock Delay Multiplier"] = "自动格挡延迟倍数",
+    ["Sigmaboy Phonk"] = "西格玛男孩 Phonk",
+    ["Canto3 Boss Battle"] = "坎托3 首领战斗",
+    ["Delete all sounds"] = "删除所有声音",
+    ["Custom themes"] = "自定义主题",
+    ["Load theme"] = "加载主题",
+    ["Overwrite theme"] = "覆盖主题",
+    ["Delete theme"] = "删除主题",
+    ["Refresh list"] = "刷新列表",
+    ["Set as default"] = "设为默认",
+    ["Reset default"] = "重置默认",
+    ["Load config"] = "加载配置",
+    ["Overwrite config"] = "覆盖配置",
+    ["Delete config"] = "删除配置",
+    ["Set as autoload"] = "设为自动加载",
+    ["Reset autoload"] = "重置自动加载",
+    ["Current autoload config"] = "当前自动加载配置",
+    ["none"] = "无",
+    ["Background color"] = "背景颜色",
+    ["Main color"] = "主颜色",
+    ["Accent color"] = "强调颜色",
+    ["Outline color"] = "轮廓颜色",
+    ["Font color"] = "字体颜色",
+    ["Font Face"] = "字体",
+    ["Code"] = "代码",
+    ["Keybind to close UI is RightAlt"] = "关闭界面的按键是右 Alt",
+    ["Discord RPC"] = "Discord RPC",
+    ["Swap RPC Icons Position"] = "交换 RPC 图标位置",
+    ["Open Menu Keybind"] = "打开菜单按键",
+    ["Custom Cursor"] = "自定义光标",
+    ["Debug Mode"] = "调试模式",
+    ["Notification Side"] = "通知侧边",
+    ["Utility"] = "实用工具",
+    ["Theme list"] = "主题列表",
+    ["Default"] = "默认",
+    ["Custom theme name"] = "自定义主题名称",
+    ["Create theme"] = "创建主题",
+    ["DPI Scale"] = "DPI 缩放",
+    ["Right"] = "右",
+    ["Configuration State"] = "配置状态",
+    ["Config name"] = "配置名称",
+    ["Create config"] = "创建配置",
+    ["Config list"] = "配置列表",
+    ["Download Custom Music"] = "下载自定义音乐",
+    ["RAW Music file link, NOT Youtube Link"] = "原始音乐文件链接，不是 YouTube 链接",
+    ["File name"] = "文件名",
+    ["Enter the file name"] = "输入文件名",
+    ["Download Sound"] = "下载声音",
+    ["themes"] = "主题",
+    ["list"] = "列表",
+    ["Search themes"] = "搜索主题",
+    ["Themes"] = "主题",
+    ["Note: MP3 format is"] = "注意：MP3 格式是",
+    ["recommended as other formats"] = "推荐的，因为其他格式",
+    ["have not been tested."] = "未经过测试。",
+    ["Reminder: Always include the"] = "提醒：始终包含",
+    ["Download Custom"] = "下载自定义",
+}
+
+local function translateText(text)
+    if not text or type(text) ~= "string" then return text end
+    
+    if Translations[text] then
+        return Translations[text]
+    end
+    
+    for en, cn in pairs(Translations) do
+        if text:find(en) then
+            return text:gsub(en, cn)
+        end
+    end
+    
+    return text
+end
+
+local function setupTranslationEngine()
+    local success, err = pcall(function()
+        local oldIndex = getrawmetatable(game).__newindex
+        setreadonly(getrawmetatable(game), false)
+        
+        getrawmetatable(game).__newindex = newcclosure(function(t, k, v)
+            if (t:IsA("TextLabel") or t:IsA("TextButton") or t:IsA("TextBox")) and k == "Text" then
+                v = translateText(tostring(v))
+            end
+            return oldIndex(t, k, v)
+        end)
+        
+        setreadonly(getrawmetatable(game), true)
+    end)
+    
+    if not success then
+        warn("元表劫持失败:", err)
+       
+        local translated = {}
+        local function scanAndTranslate()
+            for _, gui in ipairs(game:GetService("CoreGui"):GetDescendants()) do
+                if (gui:IsA("TextLabel") or gui:IsA("TextButton") or gui:IsA("TextBox")) and not translated[gui] then
+                    pcall(function()
+                        local text = gui.Text
+                        if text and text ~= "" then
+                            local translatedText = translateText(text)
+                            if translatedText ~= text then
+                                gui.Text = translatedText
+                                translated[gui] = true
+                            end
+                        end
+                    end)
+                end
+            end
+            
+            local player = game:GetService("Players").LocalPlayer
+            if player and player:FindFirstChild("PlayerGui") then
+                for _, gui in ipairs(player.PlayerGui:GetDescendants()) do
+                    if (gui:IsA("TextLabel") or gui:IsA("TextButton") or gui:IsA("TextBox")) and not translated[gui] then
+                        pcall(function()
+                            local text = gui.Text
+                            if text and text ~= "" then
+                                local translatedText = translateText(text)
+                                if translatedText ~= text then
+                                    gui.Text = translatedText
+                                    translated[gui] = true
+                                end
+                            end
+                        end)
+                    end
+                end
+            end
+        end
+        
+        local function setupDescendantListener(parent)
+            parent.DescendantAdded:Connect(function(descendant)
+                if descendant:IsA("TextLabel") or descendant:IsA("TextButton") or descendant:IsA("TextBox") then
+                    task.wait(0.1)
+                    pcall(function()
+                        local text = descendant.Text
+                        if text and text ~= "" then
+                            local translatedText = translateText(text)
+                            if translatedText ~= text then
+                                descendant.Text = translatedText
+                            end
+                        end
+                    end)
+                end
+            end)
+        end
+        
+        pcall(setupDescendantListener, game:GetService("CoreGui"))
+        local player = game:GetService("Players").LocalPlayer
+        if player and player:FindFirstChild("PlayerGui") then
+            pcall(setupDescendantListener, player.PlayerGui)
+        end
+        
+        while true do
+            scanAndTranslate()
+            task.wait(3)
+        end
+    end
+end
+
+task.wait(2)
+
+setupTranslationEngine()
+
+local success, err = pcall(function()
+--这下面填加载外部脚本
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ivannetta/ShitScripts/main/forsaken.lua"))()
+
+
+end)
+
+if not success then
+    warn("加载失败:", err)
+end

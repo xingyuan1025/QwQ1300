@@ -1,0 +1,105 @@
+_G["a1"] = Instance.new("ScreenGui")
+_G["a1"].Name = ""
+_G["a1"].ResetOnSpawn = false
+_G["a1"].Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+_G["b2"] = Instance.new("Frame")
+_G["b2"].Size = UDim2.new(0, 500, 0, 400)
+_G["b2"].Position = UDim2.new(0, 10, 0, 10)
+_G["b2"].BackgroundTransparency = 1
+_G["b2"].BorderSizePixel = 0
+_G["b2"].Parent = _G["a1"]
+
+_G["c3"] = Instance.new("TextLabel")
+_G["c3"].Size = UDim2.new(1, 0, 1, 0)
+_G["c3"].Position = UDim2.new(0, 0, 0, 0)
+_G["c3"].BackgroundTransparency = 1
+_G["c3"].TextColor3 = Color3.fromRGB(0, 255, 0)
+_G["c3"].Font = Enum.Font.Code
+_G["c3"].TextSize = 14
+_G["c3"].TextXAlignment = Enum.TextXAlignment.Left
+_G["c3"].TextYAlignment = Enum.TextYAlignment.Top
+_G["c3"].RichText = true
+_G["c3"].TextStrokeTransparency = 0
+_G["c3"].TextStrokeColor3 = Color3.fromRGB(0,0,0)
+_G["c3"].Text = "<b>Loading...</b>"
+_G["c3"].Parent = _G["b2"]
+
+local rs = game:GetService("RunService")
+local us = game:GetService("UserInputService")
+local st = game:GetService("Stats")
+
+_G["f6"], _G["g7"], _G["h8"] = 0, 0, 0
+rs.Heartbeat:Connect(function(dt) _G["f6"] = dt*1000 end)
+rs.RenderStepped:Connect(function(dt) _G["g7"] = dt*1000 end)
+rs.Stepped:Connect(function(_, dt) _G["h8"] = dt*1000 end)
+
+_G["i9"], _G["j0"], _G["k1"], _G["l2"] = false, nil, nil, nil
+local function m3(inp)
+	if not _G["i9"] then return end
+	local delta = inp.Position - _G["k1"]
+	_G["b2"].Position = UDim2.new(
+		_G["l2"].X.Scale, math.clamp(_G["l2"].X.Offset + delta.X, 0, workspace.CurrentCamera.ViewportSize.X - _G["b2"].AbsoluteSize.X),
+		_G["l2"].Y.Scale, math.clamp(_G["l2"].Y.Offset + delta.Y, 0, workspace.CurrentCamera.ViewportSize.Y - _G["b2"].AbsoluteSize.Y)
+	)
+end
+
+_G["b2"].InputBegan:Connect(function(inp)
+	if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+		_G["i9"] = true
+		_G["k1"] = inp.Position
+		_G["l2"] = _G["b2"].Position
+		inp.Changed:Connect(function()
+			if inp.UserInputState == Enum.UserInputState.End then
+				_G["i9"] = false
+			end
+		end)
+	end
+end)
+
+_G["b2"].InputChanged:Connect(function(inp)
+	if inp.UserInputType == Enum.UserInputType.MouseMovement then
+		_G["j0"] = inp
+	end
+end)
+
+us.InputChanged:Connect(function(inp)
+	if inp == _G["j0"] then m3(inp) end
+end)
+
+local fpsCounter = 0
+local currentFPS = 0
+local lastTick = tick()
+local startTime = os.time()
+
+rs.RenderStepped:Connect(function()
+	fpsCounter += 1
+	local now = tick()
+	if now - lastTick >= 1 then
+		currentFPS = fpsCounter
+		fpsCounter = 0
+		lastTick = now
+	end
+
+	local ping = st.Network.ServerStatsItem["Data Ping"]:GetValueString()
+	local memTotal = math.floor(st:GetTotalMemoryUsageMb())
+	local memLua = math.floor(collectgarbage("count")/1024)
+	local parts = #workspace:GetDescendants()
+	local players = #game.Players:GetPlayers()
+	local uptime = os.time() - startTime
+	local h = math.floor(uptime/3600)
+	local m = math.floor(uptime%3600/60)
+	local s = uptime%60
+
+	_G["c3"].Text = string.format([[<b>玩家实时数据Kenny帧率:</b> %d
+<b>网络延迟:</b> %s
+<b>总内存:</b> %d MB
+<b>Lua 内存:</b> %d MB
+<b>零件数:</b> %d
+<b>玩家数:</b> %d
+<b>心跳间隔:</b> %.2f ms
+<b>渲染步进:</b> %.2f ms
+<b>步进时间:</b> %.2f ms
+<b>运行时长:</b> %02d:%02d:%02d]],
+		currentFPS, ping, memTotal, memLua, parts, players, _G["f6"], _G["g7"], _G["h8"], h, m, s)
+end)

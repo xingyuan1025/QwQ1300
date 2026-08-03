@@ -1,0 +1,256 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local StarterGui = game:GetService("StarterGui")
+local mouse = player:GetMouse()
+local UserInputService = game:GetService("UserInputService")
+
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "ElementTeleportGUI"
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 400, 0, 300)
+frame.Position = UDim2.new(0.5, -200, 0.1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+
+local closeBtn = Instance.new("TextButton", frame)
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0, 5)
+closeBtn.Text = "❌"
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+closeBtn.Font = Enum.Font.SourceSansBold
+closeBtn.TextSize = 20
+closeBtn.MouseButton1Click:Connect(function()
+	gui:Destroy()
+end)
+
+local langContainer = Instance.new("Frame", frame)
+langContainer.Size = UDim2.new(0, 140, 0, 30)
+langContainer.Position = UDim2.new(0, 5, 0, 5)
+langContainer.BackgroundTransparency = 1
+
+local langBtn = Instance.new("TextButton", langContainer)
+langBtn.Size = UDim2.new(0, 70, 1, 0)
+langBtn.Position = UDim2.new(0, 0, 0, 0)
+langBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+langBtn.TextColor3 = Color3.new(1, 1, 1)
+langBtn.Font = Enum.Font.SourceSansBold
+langBtn.TextSize = 16
+
+local discordLabel = Instance.new("TextLabel", langContainer)
+discordLabel.Size = UDim2.new(0, 65, 1, 0)
+discordLabel.Position = UDim2.new(0, 75, 0, 0)
+discordLabel.BackgroundTransparency = 1
+discordLabel.TextColor3 = Color3.new(1, 1, 1)
+discordLabel.Font = Enum.Font.SourceSansBold
+discordLabel.TextSize = 16
+discordLabel.Text = "鸡巴大大 Kenny"
+discordLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local textbox = Instance.new("TextBox", frame)
+textbox.Size = UDim2.new(1, -40, 0, 35)
+textbox.Position = UDim2.new(0, 20, 0, 50)
+textbox.Text = ""
+textbox.Font = Enum.Font.SourceSans
+textbox.TextSize = 18
+textbox.ClearTextOnFocus = false
+
+local teleportBtn = Instance.new("TextButton", frame)
+teleportBtn.Size = UDim2.new(1, -40, 0, 35)
+teleportBtn.Position = UDim2.new(0, 20, 0, 95)
+teleportBtn.Font = Enum.Font.SourceSansBold
+teleportBtn.TextSize = 18
+teleportBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 180)
+teleportBtn.TextColor3 = Color3.new(1, 1, 1)
+
+local touchedLabel = Instance.new("TextLabel", frame)
+touchedLabel.Size = UDim2.new(1, -40, 0, 35)
+touchedLabel.Position = UDim2.new(0, 20, 0, 140)
+touchedLabel.Font = Enum.Font.SourceSans
+touchedLabel.TextSize = 16
+touchedLabel.TextColor3 = Color3.new(1, 1, 1)
+touchedLabel.BackgroundTransparency = 1
+touchedLabel.TextWrapped = true
+
+local copyBtn = Instance.new("TextButton", frame)
+copyBtn.Size = UDim2.new(1, -40, 0, 30)
+copyBtn.Position = UDim2.new(0, 20, 0, 180)
+copyBtn.Font = Enum.Font.SourceSansBold
+copyBtn.TextSize = 16
+copyBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+copyBtn.TextColor3 = Color3.new(1, 1, 1)
+
+local toggleBtn = Instance.new("TextButton", frame)
+toggleBtn.Size = UDim2.new(1, -40, 0, 30)
+toggleBtn.Position = UDim2.new(0, 20, 0, 220)
+toggleBtn.Font = Enum.Font.SourceSansBold
+toggleBtn.TextSize = 16
+toggleBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+toggleBtn.TextColor3 = Color3.new(1, 1, 1)
+
+local currentLang = "ar"
+local touchMode = false
+local currentTouchedName = ""
+
+local translations = {
+	ar = {
+		lang = "鸟语",
+		teleport = "🔁 传送",
+		touched = "📌 坐标: ",
+		copy = "📋 复制名称",
+		toggle_on = "🎯 开始",
+		toggle_off = "🛑 关闭",
+		placeholder = "粘贴在这",
+		notfound = "⚠️ 没找到",
+		notfound_msg = "传送失败",
+		copy_done = "✅ 成功复制"
+	},
+	en = {
+		lang = "中文",
+		teleport = "🔁 Teleport",
+		touched = "📌 Element: ",
+		copy = "📋 Copy Name",
+		toggle_on = "🎯 Enable Touch",
+		toggle_off = "🛑 Disable Touch",
+		placeholder = "Type or paste element path",
+		notfound = "⚠️ Failed",
+		notfound_msg = "Element not found or not teleportable",
+		copy_done = "✅ Copied"
+	}
+}
+
+local function updateLanguage()
+	local t = translations[currentLang]
+	langBtn.Text = t.lang
+	teleportBtn.Text = t.teleport
+	touchedLabel.Text = t.touched .. (currentTouchedName ~= "" and currentTouchedName or "—")
+	copyBtn.Text = t.copy
+	toggleBtn.Text = touchMode and t.toggle_off or t.toggle_on
+	textbox.PlaceholderText = t.placeholder
+end
+
+langBtn.MouseButton1Click:Connect(function()
+	currentLang = (currentLang == "ar") and "en" or "ar"
+	updateLanguage()
+end)
+
+local function teleportToPath(path)
+	local success, result = pcall(function()
+		local target = game
+		for part in string.gmatch(path, "[^%.]+") do
+			target = target:FindFirstChild(part)
+			if not target then return nil end
+		end
+		return target
+	end)
+
+	if success and result and result:IsA("BasePart") then
+		local char = player.Character or player.CharacterAdded:Wait()
+		local root = char:FindFirstChild("HumanoidRootPart")
+		if root then
+			root.CFrame = result.CFrame + Vector3.new(0, 5, 0)
+		end
+	else
+		local t = translations[currentLang]
+		StarterGui:SetCore("SendNotification", {
+			Title = t.notfound,
+			Text = t.notfound_msg,
+			Duration = 4
+		})
+	end
+end
+
+toggleBtn.MouseButton1Click:Connect(function()
+	touchMode = not touchMode
+	updateLanguage()
+end)
+
+local function handleTarget(target)
+	if target then
+		currentTouchedName = target:GetFullName()
+		updateLanguage()
+	end
+end
+
+mouse.Button1Down:Connect(function()
+	if touchMode then
+		handleTarget(mouse.Target)
+	end
+end)
+
+UserInputService.TouchStarted:Connect(function(input)
+	if not touchMode then return end
+	local pos = input.Position
+	local camera = workspace.CurrentCamera
+	local ray = workspace:Raycast(camera.CFrame.Position, (camera:ScreenPointToRay(pos.X, pos.Y).Direction) * 500)
+	if ray then
+		handleTarget(ray.Instance)
+	end
+end)
+
+copyBtn.MouseButton1Click:Connect(function()
+	if currentTouchedName ~= "" then
+		setclipboard(currentTouchedName)
+		StarterGui:SetCore("SendNotification", {
+			Title = translations[currentLang].copy_done,
+			Text = currentTouchedName,
+			Duration = 3
+		})
+	end
+end)
+
+teleportBtn.MouseButton1Click:Connect(function()
+	local path = textbox.Text
+	if path and path ~= "" then
+		teleportToPath(path)
+	end
+end)
+
+player.CharacterAdded:Connect(function()
+	wait(0.5)
+	if gui and not gui.Parent then
+		gui.Parent = player:WaitForChild("PlayerGui")
+	end
+end)
+
+updateLanguage()
+
+local dragging, dragInput, dragStart, startPos
+
+local function updateInput(input)
+	local delta = input.Position - dragStart
+	frame.Position = UDim2.new(
+		startPos.X.Scale,
+		startPos.X.Offset + delta.X,
+		startPos.Y.Scale,
+		startPos.Y.Offset + delta.Y
+	)
+end
+
+frame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+frame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		updateInput(input)
+	end
+end)

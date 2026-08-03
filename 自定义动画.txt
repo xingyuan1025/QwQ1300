@@ -1,0 +1,198 @@
+local rs = game:GetService("RunService")
+local plr = game:GetService("Players").LocalPlayer
+local cg = cloneref(game:GetService("CoreGui"))
+local fps = 12
+local animSpeed = 1
+local running = true
+local minimized = false
+
+AccWait = function(t)
+	local s = os.clock()
+	local con
+	con = rs.PreSimulation:Connect(function()
+		if os.clock() - s >= t then
+			con:Disconnect()
+		end
+	end)
+	while rs.Heartbeat:Wait() and os.clock() - s < t do end
+end
+
+GetHum = function()
+	local c = plr.Character
+	if c then
+		return c:FindFirstChildOfClass("Humanoid")
+	end
+end
+
+local sg = Instance.new("ScreenGui")
+sg.Parent = cg
+
+local frame = Instance.new("Frame", sg)
+frame.Size = UDim2.new(0, 200, 0, 130)
+frame.Position = UDim2.new(0, 20, 0, 200)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+frame.Active = true
+frame.Draggable = true
+
+local titleBar = Instance.new("Frame", frame)
+titleBar.Size = UDim2.new(1, 0, 0, 25)
+titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+local title = Instance.new("TextLabel", titleBar)
+title.Size = UDim2.new(1, -50, 1, 0)
+title.Position = UDim2.new(0, 5, 0, 0)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.new(1, 1, 1)
+title.Text = "动画编辑器Kenny鸡巴大"
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 18
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+local minBtn = Instance.new("TextButton", titleBar)
+minBtn.Size = UDim2.new(0, 25, 1, 0)
+minBtn.Position = UDim2.new(1, -50, 0, 0)
+minBtn.Text = "-"
+minBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+minBtn.TextColor3 = Color3.new(1,1,1)
+
+local closeBtn = Instance.new("TextButton", titleBar)
+closeBtn.Size = UDim2.new(0, 25, 1, 0)
+closeBtn.Position = UDim2.new(1, -25, 0, 0)
+closeBtn.Text = "X"
+closeBtn.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+closeBtn.TextColor3 = Color3.new(1,1,1)
+
+local content = Instance.new("Frame", frame)
+content.Size = UDim2.new(1, 0, 1, -25)
+content.Position = UDim2.new(0, 0, 0, 25)
+content.BackgroundTransparency = 1
+
+local fpsLabel = Instance.new("TextLabel", content)
+fpsLabel.Size = UDim2.new(1, -10, 0, 20)
+fpsLabel.Position = UDim2.new(0, 5, 0, 5)
+fpsLabel.BackgroundTransparency = 1
+fpsLabel.TextColor3 = Color3.new(1,1,1)
+fpsLabel.Text = "FPS: " .. fps
+
+local fpsBox = Instance.new("TextBox", content)
+fpsBox.Size = UDim2.new(1, -10, 0, 20)
+fpsBox.Position = UDim2.new(0, 5, 0, 25)
+fpsBox.Text = tostring(fps)
+fpsBox.BackgroundTransparency = 1
+fpsBox.TextColor3 = Color3.new(1,1,1)
+fpsBox.ClearTextOnFocus = false
+fpsBox.Font = Enum.Font.SourceSans
+fpsBox.TextSize = 16
+local fpsLine = Instance.new("Frame", fpsBox)
+fpsLine.Size = UDim2.new(1, 0, 0, 1)
+fpsLine.Position = UDim2.new(0, 0, 1, -1)
+fpsLine.BackgroundColor3 = Color3.new(1,1,1)
+
+local speedLabel = Instance.new("TextLabel", content)
+speedLabel.Size = UDim2.new(1, -10, 0, 20)
+speedLabel.Position = UDim2.new(0, 5, 0, 50)
+speedLabel.BackgroundTransparency = 1
+speedLabel.TextColor3 = Color3.new(1,1,1)
+speedLabel.Text = "动画速度: " .. animSpeed
+
+local speedBox = Instance.new("TextBox", content)
+speedBox.Size = UDim2.new(1, -10, 0, 20)
+speedBox.Position = UDim2.new(0, 5, 0, 70)
+speedBox.Text = tostring(animSpeed)
+speedBox.BackgroundTransparency = 1
+speedBox.TextColor3 = Color3.new(1,1,1)
+speedBox.ClearTextOnFocus = false
+speedBox.Font = Enum.Font.SourceSans
+speedBox.TextSize = 16
+local speedLine = Instance.new("Frame", speedBox)
+speedLine.Size = UDim2.new(1, 0, 0, 1)
+speedLine.Position = UDim2.new(0, 0, 1, -1)
+speedLine.BackgroundColor3 = Color3.new(1,1,1)
+
+local confirmFrame = Instance.new("Frame", sg)
+confirmFrame.Size = UDim2.new(0, 200, 0, 100)
+confirmFrame.Position = UDim2.new(0.5, -100, 0.5, -50)
+confirmFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+confirmFrame.Visible = false
+
+local confirmText = Instance.new("TextLabel", confirmFrame)
+confirmText.Size = UDim2.new(1, -10, 0, 50)
+confirmText.Position = UDim2.new(0, 5, 0, 5)
+confirmText.BackgroundTransparency = 1
+confirmText.TextColor3 = Color3.new(1,1,1)
+confirmText.Text = "退出编辑器?"
+confirmText.TextWrapped = true
+
+local yesBtn = Instance.new("TextButton", confirmFrame)
+yesBtn.Size = UDim2.new(0.5, -5, 0, 30)
+yesBtn.Position = UDim2.new(0, 5, 1, -35)
+yesBtn.Text = "对你个傻逼"
+yesBtn.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+yesBtn.TextColor3 = Color3.new(1,1,1)
+
+local noBtn = Instance.new("TextButton", confirmFrame)
+noBtn.Size = UDim2.new(0.5, -5, 0, 30)
+noBtn.Position = UDim2.new(0.5, 0, 1, -35)
+noBtn.Text = "点错了"
+noBtn.BackgroundColor3 = Color3.fromRGB(50, 170, 50)
+noBtn.TextColor3 = Color3.new(1,1,1)
+
+fpsBox.FocusLost:Connect(function()
+	local v = tonumber(fpsBox.Text)
+	if v and v > 0 then
+		fps = v
+		fpsLabel.Text = "FPS: " .. fps
+	end
+end)
+
+speedBox.FocusLost:Connect(function()
+	local v = tonumber(speedBox.Text)
+	if v and v >= 0 then
+		animSpeed = v
+		speedLabel.Text = "动画速度: " .. animSpeed
+	end
+end)
+
+minBtn.MouseButton1Click:Connect(function()
+	minimized = not minimized
+	content.Visible = not minimized
+	minBtn.Text = minimized and "+" or "-"
+	if minimized then
+		frame.Size = UDim2.new(0, 200, 0, 25)
+	else
+		frame.Size = UDim2.new(0, 200, 0, 130)
+	end
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+	confirmFrame.Visible = true
+end)
+
+yesBtn.MouseButton1Click:Connect(function()
+	running = false
+	confirmFrame.Visible = false
+	local hum = GetHum()
+	if hum then
+		for _, track in ipairs(hum:GetPlayingAnimationTracks()) do
+			track:AdjustSpeed(1)
+		end
+	end
+	sg:Destroy()
+end)
+
+noBtn.MouseButton1Click:Connect(function()
+	confirmFrame.Visible = false
+end)
+
+task.spawn(function()
+	while running do
+		local hum = GetHum()
+		if hum then
+			for _, track in ipairs(hum:GetPlayingAnimationTracks()) do
+				track:AdjustSpeed(0)
+				track.TimePosition = track.TimePosition + (animSpeed / fps)
+			end
+		end
+		AccWait(1 / fps)
+	end
+end)

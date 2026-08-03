@@ -1,0 +1,111 @@
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local MaterialService = game:GetService("MaterialService")
+
+-- Force the game to stay in daytime
+local function forceDaytime()
+    Lighting.ClockTime = 12  -- Set time to 12:00 PM (midday)
+    Lighting.GeographicLatitude = 0  -- Adjust for direct sunlight
+end
+
+-- Continuously force daytime (to prevent other scripts from changing it)
+RunService.Heartbeat:Connect(function()
+    forceDaytime()
+end)
+
+-- Configure global lighting settings
+Lighting.GlobalShadows = true  -- Enable shadows
+Lighting.ShadowSoftness = 0.3  -- Softer shadows for better visibility
+Lighting.Brightness = 3        -- Increase overall brightness
+Lighting.OutdoorAmbient = Color3.new(0.8, 0.8, 0.8)  -- Brighter ambient light
+Lighting.Ambient = Color3.new(0.6, 0.6, 0.6)  -- Brighter indoor light
+
+-- Enable realistic lighting technology (ShadowMap or Voxel)
+Lighting.Technology = Enum.Technology.ShadowMap  -- Use ShadowMap for realistic shadows
+
+-- Add SunRays for god rays effect (optional)
+local sunRays = Instance.new("SunRaysEffect")
+sunRays.Parent = Lighting
+sunRays.Intensity = 0.2  -- Subtle sun rays
+sunRays.Spread = 0.5
+
+-- Add Bloom for glowing effects (optional)
+local bloom = Instance.new("BloomEffect")
+bloom.Parent = Lighting
+bloom.Intensity = 0.3  -- Reduced bloom intensity
+bloom.Size = 10
+
+-- Add Atmosphere for a light fog effect (optional)
+local atmosphere = Instance.new("Atmosphere")
+atmosphere.Parent = Lighting
+atmosphere.Density = 0.1  -- Reduced fog density
+atmosphere.Offset = 0.5
+atmosphere.Color = Color3.new(0.9, 0.9, 0.9)  -- Lighter fog color
+atmosphere.Decay = Color3.new(0.9, 0.9, 0.9)
+atmosphere.Glare = 0
+atmosphere.Haze = 0
+
+-- Add ColorCorrection for a slightly desaturated look (optional)
+local colorCorrection = Instance.new("ColorCorrectionEffect")
+colorCorrection.Parent = Lighting
+colorCorrection.Saturation = -0.1  -- Slight desaturation
+colorCorrection.Contrast = 0.1     -- Slight contrast increase
+
+-- Add Blur for a subtle post-processing effect (optional)
+local blur = Instance.new("BlurEffect")
+blur.Parent = Lighting
+blur.Size = 1  -- Slight blur for a soft effect
+
+-- Disable reflections for all parts
+local function disableReflections(part)
+    if part:IsA("BasePart") then
+        part.Reflectance = 0  -- Disable reflections
+    end
+end
+
+-- Apply to all existing parts
+for _, part in ipairs(workspace:GetDescendants()) do
+    disableReflections(part)
+end
+
+-- Listen for new parts being added
+workspace.DescendantAdded:Connect(function(part)
+    disableReflections(part)
+end)
+
+-- Make glass materials clear but non-reflective (optional)
+local function makeGlassClear(part)
+    if part:IsA("BasePart") and part.Material == Enum.Material.Glass then
+        part.Transparency = 1  -- Fully transparent
+        part.Reflectance = 0   -- No reflections
+    end
+end
+
+-- Apply to all existing glass parts
+for _, part in ipairs(workspace:GetDescendants()) do
+    makeGlassClear(part)
+end
+
+-- Listen for new glass parts being added
+workspace.DescendantAdded:Connect(function(part)
+    makeGlassClear(part)
+end)
+
+-- Dynamic performance adjustment for low-end devices
+local function onDevicePerformance(performance)
+    if performance == "low" then
+        bloom.Enabled = false
+        blur.Enabled = false
+        sunRays.Enabled = false
+        Lighting.GlobalShadows = false
+    else
+        bloom.Enabled = true
+        blur.Enabled = true
+        sunRays.Enabled = true
+        Lighting.GlobalShadows = true
+    end
+end
+
+-- Simulate device performance check (replace with actual performance detection)
+local performanceLevel = "medium"  -- Assume medium performance by default
+onDevicePerformance(performanceLevel)

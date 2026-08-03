@@ -1,0 +1,896 @@
+-- Original Obfuscated Script https://pastefy.app/QXM5wcGZ/raw
+-- i decided to make it Open source:3
+-- [{ Deobfuscated with Manuplier.com }]
+-- Fully Deobfuscated Script
+
+-- 1000000- CC QuadCil "***************************************************************"
+
+local function b32decode(data)
+
+    local b = '**************************************"***************************************/'
+
+    data = string.gsub(data, '[^' .. b .. '=]', '')
+
+    return (data:gsub('.', function(x)
+
+        if (x == '=') then return '' end
+
+        local r, f = '', (b:find(x) - 1)
+
+        for i = 6, 1, -1 do
+
+            r = r .. (f % 2 ^ i - f % 2 ^ (i - 1) > 0 and '1' or '0')
+
+        end
+
+        return r
+
+    end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x)
+
+        if (#x ~= 8) then return '' end
+
+        local c = 0
+
+        for i = 1, 8 do
+
+            c = c + (x:sub(i, i) == '1' and 2 ^ (8 - i) or 0)
+
+        end
+
+        return string.char(c)
+
+    end))
+
+end
+
+local function xor_str(str, key)
+
+    local res = {}
+
+    for i = 1, #str do
+
+        local c = string.byte(str, i)
+
+        local k = string.byte(key, (i - 1) % #key + 1)
+
+        res[i] = string.char(bit32.bxor(c, k))
+
+    end
+
+    return table.concat(res)
+
+end
+
+--[[
+
+ Player Teleporter GUI v1.2
+
+ [{ Reverse by manuplier.com }]
+
+]]
+
+local Players = game:GetService("Players")
+
+local UserInputService = game:GetService("UserInputService")
+
+local RunService = game:GetService("RunService")
+
+local TweenService = game:GetService("TweenService")
+
+local LocalPlayer = Players.LocalPlayer
+
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create main GUI
+
+local Gui = Instance.new("ScreenGui")
+
+local MainFrame = Instance.new("Frame")
+
+local UICorner = Instance.new("UICorner")
+
+-- Header
+
+local Header = Instance.new("Frame")
+
+local HeaderCorner = Instance.new("UICorner")
+
+local Title = Instance.new("TextLabel")
+
+local CloseButton = Instance.new("TextButton")
+
+-- Left Panel (Online Players)
+
+local LeftPanel = Instance.new("Frame")
+
+local LeftCorner = Instance.new("UICorner")
+
+local OnlineTitle = Instance.new("TextLabel")
+
+local PlayerList = Instance.new("ScrollingFrame")
+
+local UIListLayout = Instance.new("UIListLayout")
+
+-- Right Panel (Actions)
+
+local RightPanel = Instance.new("Frame")
+
+local RightCorner = Instance.new("UICorner")
+
+local ActionsTitle = Instance.new("TextLabel")
+
+local NoPlayerFrame = Instance.new("Frame")
+
+local NoPlayerCorner = Instance.new("UICorner")
+
+local NoPlayerIcon = Instance.new("TextLabel")
+
+local NoPlayerText = Instance.new("TextLabel")
+
+local SelectedPlayerFrame = Instance.new("Frame")
+
+local SelectedPlayerCorner = Instance.new("UICorner")
+
+local SelectedAvatar = Instance.new("ImageLabel")
+
+local SelectedName = Instance.new("TextLabel")
+
+local TeleportButton = Instance.new("TextButton")
+
+local FollowButton = Instance.new("TextButton")
+
+local StopFollowButton = Instance.new("TextButton")
+
+-- Colors
+
+local bgColor = Color3.fromRGB(45, 45, 55)
+
+local headerColor = Color3.fromRGB(35, 35, 45)
+
+local panelColor = Color3.fromRGB(40, 40, 50)
+
+local selectedColor = Color3.fromRGB(30, 30, 40)
+
+local textColor = Color3.fromRGB(255, 255, 255)
+
+local accentColor = Color3.fromRGB(100, 100, 120)
+
+local redColor = Color3.fromRGB(200, 60, 60)
+
+local greenColor = Color3.fromRGB(60, 180, 60)
+
+Gui.Name = "PlayerTeleporter"
+
+Gui.ResetOnSpawn = false
+
+Gui.Parent = PlayerGui
+
+-- Main Frame
+
+MainFrame.Name = "MainFrame"
+
+MainFrame.Parent = Gui
+
+MainFrame.BackgroundColor3 = bgColor
+
+MainFrame.BorderSizePixel = 0
+
+MainFrame.Position = UDim2.new(0.5, -240, 0.5, -150)
+
+MainFrame.Size = UDim2.new(0, 480, 0, 300)
+
+MainFrame.Active = true
+
+MainFrame.Draggable = true
+
+UICorner.CornerRadius = UDim.new(0, 8)
+
+UICorner.Parent = MainFrame
+
+-- Header
+
+Header.Name = "Header"
+
+Header.Parent = MainFrame
+
+Header.BackgroundColor3 = headerColor
+
+Header.BorderSizePixel = 0
+
+Header.Size = UDim2.new(1, 0, 0, 40)
+
+HeaderCorner.CornerRadius = UDim.new(0, 8)
+
+HeaderCorner.Parent = Header
+
+-- Title
+
+Title.Name = "Title"
+
+Title.Parent = Header
+
+Title.Text = "玩家传送器Kenny鸡巴大☪️"
+
+Title.TextColor3 = textColor
+
+Title.Font = Enum.Font.GothamBold
+
+Title.TextSize = 14
+
+Title.Position = UDim2.new(0, 15, 0, 0)
+
+Title.Size = UDim2.new(1, -50, 1, 0)
+
+Title.BackgroundTransparency = 1
+
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Close Button
+
+CloseButton.Name = "CloseButton"
+
+CloseButton.Parent = Header
+
+CloseButton.Text = "×"
+
+CloseButton.TextColor3 = redColor
+
+CloseButton.Font = Enum.Font.GothamBold
+
+CloseButton.TextSize = 18
+
+CloseButton.Position = UDim2.new(1, -35, 0, 5)
+
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+
+CloseButton.BackgroundColor3 = Color3.fromRGB(60, 30, 30)
+
+CloseButton.BorderSizePixel = 0
+
+local closeCorner = Instance.new("UICorner", CloseButton)
+
+closeCorner.CornerRadius = UDim.new(0, 4)
+
+-- Left Panel
+
+LeftPanel.Name = "LeftPanel"
+
+LeftPanel.Parent = MainFrame
+
+LeftPanel.BackgroundColor3 = panelColor
+
+LeftPanel.BorderSizePixel = 0
+
+LeftPanel.Position = UDim2.new(0, 10, 0, 50)
+
+LeftPanel.Size = UDim2.new(0, 230, 1, -60)
+
+LeftCorner.CornerRadius = UDim.new(0, 6)
+
+LeftCorner.Parent = LeftPanel
+
+-- Online Players Title
+
+OnlineTitle.Name = "OnlineTitle"
+
+OnlineTitle.Parent = LeftPanel
+
+OnlineTitle.Text = "◆◆ 在线玩家"
+
+OnlineTitle.TextColor3 = accentColor
+
+OnlineTitle.Font = Enum.Font.Gotham
+
+OnlineTitle.TextSize = 12
+
+OnlineTitle.Position = UDim2.new(0, 10, 0, 10)
+
+OnlineTitle.Size = UDim2.new(1, -20, 0, 20)
+
+OnlineTitle.BackgroundTransparency = 1
+
+OnlineTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Player List
+
+PlayerList.Name = "PlayerList"
+
+PlayerList.Parent = LeftPanel
+
+PlayerList.BackgroundTransparency = 1
+
+PlayerList.Position = UDim2.new(0, 5, 0, 35)
+
+PlayerList.Size = UDim2.new(1, -10, 1, -40)
+
+PlayerList.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+PlayerList.ScrollBarThickness = 4
+
+PlayerList.ScrollBarImageColor3 = accentColor
+
+UIListLayout.Parent = PlayerList
+
+UIListLayout.SortOrder = Enum.SortOrder.Name
+
+UIListLayout.Padding = UDim.new(0, 2)
+
+-- Right Panel
+
+RightPanel.Name = "RightPanel"
+
+RightPanel.Parent = MainFrame
+
+RightPanel.BackgroundColor3 = panelColor
+
+RightPanel.BorderSizePixel = 0
+
+RightPanel.Position = UDim2.new(0, 250, 0, 50)
+
+RightPanel.Size = UDim2.new(0, 220, 1, -60)
+
+RightCorner.CornerRadius = UDim.new(0, 6)
+
+RightCorner.Parent = RightPanel
+
+-- Actions Title
+
+ActionsTitle.Name = "ActionsTitle"
+
+ActionsTitle.Parent = RightPanel
+
+ActionsTitle.Text = "🔘 传送清单"
+
+ActionsTitle.TextColor3 = accentColor
+
+ActionsTitle.Font = Enum.Font.Gotham
+
+ActionsTitle.TextSize = 12
+
+ActionsTitle.Position = UDim2.new(0, 10, 0, 10)
+
+ActionsTitle.Size = UDim2.new(1, -20, 0, 20)
+
+ActionsTitle.BackgroundTransparency = 1
+
+ActionsTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+-- No Player Selected Frame
+
+NoPlayerFrame.Name = "NoPlayerFrame"
+
+NoPlayerFrame.Parent = RightPanel
+
+NoPlayerFrame.BackgroundColor3 = selectedColor
+
+NoPlayerFrame.BorderSizePixel = 0
+
+NoPlayerFrame.Position = UDim2.new(0, 10, 0, 40)
+
+NoPlayerFrame.Size = UDim2.new(1, -20, 0, 80)
+
+NoPlayerCorner.CornerRadius = UDim.new(0, 6)
+
+NoPlayerCorner.Parent = NoPlayerFrame
+
+-- No Player Icon
+
+NoPlayerIcon.Name = "NoPlayerIcon"
+
+NoPlayerIcon.Parent = NoPlayerFrame
+
+NoPlayerIcon.Text = "👤"
+
+NoPlayerIcon.TextColor3 = accentColor
+
+NoPlayerIcon.Font = Enum.Font.Gotham
+
+NoPlayerIcon.TextSize = 24
+
+NoPlayerIcon.Position = UDim2.new(0, 0, 0, 10)
+
+NoPlayerIcon.Size = UDim2.new(1, 0, 0, 30)
+
+NoPlayerIcon.BackgroundTransparency = 1
+
+-- No Player Text
+
+NoPlayerText.Name = "NoPlayerText"
+
+NoPlayerText.Parent = NoPlayerFrame
+
+NoPlayerText.Text = "未选择玩家"
+
+NoPlayerText.TextColor3 = accentColor
+
+NoPlayerText.Font = Enum.Font.Gotham
+
+NoPlayerText.TextSize = 12
+
+NoPlayerText.Position = UDim2.new(0, 0, 0, 45)
+
+NoPlayerText.Size = UDim2.new(1, 0, 0, 20)
+
+NoPlayerText.BackgroundTransparency = 1
+
+-- Selected Player Frame
+
+SelectedPlayerFrame.Name = "SelectedPlayerFrame"
+
+SelectedPlayerFrame.Parent = RightPanel
+
+SelectedPlayerFrame.BackgroundColor3 = selectedColor
+
+SelectedPlayerFrame.BorderSizePixel = 0
+
+SelectedPlayerFrame.Position = UDim2.new(0, 10, 0, 40)
+
+SelectedPlayerFrame.Size = UDim2.new(1, -20, 0, 80)
+
+SelectedPlayerFrame.Visible = false
+
+SelectedPlayerCorner.CornerRadius = UDim.new(0, 6)
+
+SelectedPlayerCorner.Parent = SelectedPlayerFrame
+
+-- Selected Player Avatar
+
+SelectedAvatar.Name = "SelectedAvatar"
+
+SelectedAvatar.Parent = SelectedPlayerFrame
+
+SelectedAvatar.BackgroundTransparency = 1
+
+SelectedAvatar.Position = UDim2.new(0, 10, 0, 10)
+
+SelectedAvatar.Size = UDim2.new(0, 60, 0, 60)
+
+SelectedAvatar.Image = ""
+
+local selectedAvatarCorner = Instance.new("UICorner", SelectedAvatar)
+
+selectedAvatarCorner.CornerRadius = UDim.new(0, 30)
+
+-- Selected Player Name
+
+SelectedName.Name = "SelectedName"
+
+SelectedName.Parent = SelectedPlayerFrame
+
+SelectedName.Text = "Anaki_22"
+
+SelectedName.TextColor3 = textColor
+
+SelectedName.Font = Enum.Font.GothamBold
+
+SelectedName.TextSize = 14
+
+SelectedName.Position = UDim2.new(0, 80, 0, 25)
+
+SelectedName.Size = UDim2.new(1, -90, 0, 30)
+
+SelectedName.BackgroundTransparency = 1
+
+SelectedName.TextXAlignment = Enum.TextXAlignment.Left
+
+SelectedName.TextYAlignment = Enum.TextYAlignment.Center
+
+-- Teleport Button
+
+TeleportButton.Name = "TeleportButton"
+
+TeleportButton.Parent = RightPanel
+
+TeleportButton.Text = "◆◆ 传送到玩家"
+
+TeleportButton.TextColor3 = textColor
+
+TeleportButton.Font = Enum.Font.GothamBold
+
+TeleportButton.TextSize = 12
+
+TeleportButton.Position = UDim2.new(0, 10, 0, 130)
+
+TeleportButton.Size = UDim2.new(1, -20, 0, 30)
+
+TeleportButton.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
+
+TeleportButton.BorderSizePixel = 0
+
+TeleportButton.Visible = false
+
+local teleportCorner = Instance.new("UICorner", TeleportButton)
+
+teleportCorner.CornerRadius = UDim.new(0, 6)
+
+-- Follow Button
+
+FollowButton.Name = "FollowButton"
+
+FollowButton.Parent = RightPanel
+
+FollowButton.Text = "循环传送到玩家"
+
+FollowButton.TextColor3 = textColor
+
+FollowButton.Font = Enum.Font.GothamBold
+
+FollowButton.TextSize = 11
+
+FollowButton.Position = UDim2.new(0, 10, 0, 170)
+
+FollowButton.Size = UDim2.new(1, -20, 0, 30)
+
+FollowButton.BackgroundColor3 = Color3.fromRGB(60, 60, 180)
+
+FollowButton.BorderSizePixel = 0
+
+FollowButton.Visible = false
+
+local followCorner = Instance.new("UICorner", FollowButton)
+
+followCorner.CornerRadius = UDim.new(0, 6)
+
+-- Stop Follow Button
+
+StopFollowButton.Name = "StopFollowButton"
+
+StopFollowButton.Parent = RightPanel
+
+StopFollowButton.Text = "停止循环传送"
+
+StopFollowButton.TextColor3 = textColor
+
+StopFollowButton.Font = Enum.Font.GothamBold
+
+StopFollowButton.TextSize = 10
+
+StopFollowButton.Position = UDim2.new(0, 10, 0, 210)
+
+StopFollowButton.Size = UDim2.new(1, -20, 0, 30)
+
+StopFollowButton.BackgroundColor3 = Color3.fromRGB(180, 60, 60)
+
+StopFollowButton.BorderSizePixel = 0
+
+StopFollowButton.Visible = false
+
+local stopFollowCorner = Instance.new("UICorner", StopFollowButton)
+
+stopFollowCorner.CornerRadius = UDim.new(0, 6)
+
+-- Variables
+
+local selectedPlayer = nil
+
+local selectedButton = nil
+
+local followConnection = nil
+
+local isFollowing = false
+
+-- Functions
+
+local function createPlayerButton(player)
+
+    local button = Instance.new("TextButton")
+
+    local avatar = Instance.new("ImageLabel")
+
+    local nameLabel = Instance.new("TextLabel")
+
+    
+
+    button.Name = player.Name
+
+    button.Parent = PlayerList
+
+    button.Size = UDim2.new(1, -5, 0, 50)
+
+    button.BackgroundColor3 = selectedColor
+
+    button.BorderSizePixel = 0
+
+    button.Text = ""
+
+    
+
+    local corner = Instance.new("UICorner", button)
+
+    corner.CornerRadius = UDim.new(0, 6)
+
+    
+
+    -- Avatar
+
+    avatar.Name = "Avatar"
+
+    avatar.Parent = button
+
+    avatar.BackgroundTransparency = 1
+
+    avatar.Position = UDim2.new(0, 8, 0, 8)
+
+    avatar.Size = UDim2.new(0, 34, 0, 34)
+
+    avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=150&h=150"
+
+    
+
+    local avatarCorner = Instance.new("UICorner", avatar)
+
+    avatarCorner.CornerRadius = UDim.new(0, 17)
+
+    
+
+    -- Name Label
+
+    nameLabel.Name = "NameLabel"
+
+    nameLabel.Parent = button
+
+    nameLabel.Text = player.Name
+
+    nameLabel.TextColor3 = textColor
+
+    nameLabel.Font = Enum.Font.Gotham
+
+    nameLabel.TextSize = 12
+
+    nameLabel.Position = UDim2.new(0, 50, 0, 0)
+
+    nameLabel.Size = UDim2.new(1, -55, 1, 0)
+
+    nameLabel.BackgroundTransparency = 1
+
+    nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+    nameLabel.TextYAlignment = Enum.TextYAlignment.Center
+
+    
+
+    button.MouseButton1Click:Connect(function()
+
+        -- Deselect previous button
+
+        if selectedButton then
+
+            selectedButton.BackgroundColor3 = selectedColor
+
+        end
+
+        
+
+        -- Select new button
+
+        selectedButton = button
+
+        selectedPlayer = player
+
+        button.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+
+        
+
+        -- Hide no player frame and show selected player frame
+
+        NoPlayerFrame.Visible = false
+
+        SelectedPlayerFrame.Visible = true
+
+        
+
+        -- Update selected player info
+
+        SelectedAvatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=150&h=150"
+
+        SelectedName.Text = player.Name
+
+        
+
+        -- Show action buttons
+
+        TeleportButton.Visible = true
+
+        FollowButton.Visible = not isFollowing
+
+        StopFollowButton.Visible = isFollowing
+
+    end)
+
+    
+
+    -- Hover effect
+
+    button.MouseEnter:Connect(function()
+
+        if selectedButton ~= button then
+
+            button.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+
+        end
+
+    end)
+
+    
+
+    button.MouseLeave:Connect(function()
+
+        if selectedButton ~= button then
+
+            button.BackgroundColor3 = selectedColor
+
+        end
+
+    end)
+
+    
+
+    return button
+
+end
+
+local function teleportToPlayer()
+
+    if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+
+        local targetPosition = selectedPlayer.Character.HumanoidRootPart.Position
+
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+
+            LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 0, 3))
+
+        end
+
+    end
+
+end
+
+local function startFollowing()
+
+    if selectedPlayer and selectedPlayer.Character then
+
+        isFollowing = true
+
+        FollowButton.Visible = false
+
+        StopFollowButton.Visible = true
+
+        
+
+        followConnection = RunService.Heartbeat:Connect(function()
+
+            if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+
+                local targetPosition = selectedPlayer.Character.HumanoidRootPart.Position
+
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 3))
+
+                end
+
+            else
+
+                stopFollowing()
+
+            end
+
+        end)
+
+    end
+
+end
+
+local function stopFollowing()
+
+    if followConnection then
+
+        followConnection:Disconnect()
+
+        followConnection = nil
+
+    end
+
+    isFollowing = false
+
+    FollowButton.Visible = true
+
+    StopFollowButton.Visible = false
+
+end
+
+local function cancelSelection()
+
+    if selectedButton then
+
+        selectedButton.BackgroundColor3 = selectedColor
+
+        selectedButton = nil
+
+    end
+
+    selectedPlayer = nil
+
+    stopFollowing()
+
+    NoPlayerFrame.Visible = true
+
+    SelectedPlayerFrame.Visible = false
+
+    TeleportButton.Visible = false
+
+    FollowButton.Visible = false
+
+    StopFollowButton.Visible = false
+
+end
+
+local function updatePlayerList()
+
+    -- Clear existing buttons
+
+    for _, child in pairs(PlayerList:GetChildren()) do
+
+        if child:IsA("TextButton") then
+
+            child:Destroy()
+
+        end
+
+    end
+
+    
+
+    -- Create buttons for all players
+
+    for _, player in pairs(Players:GetPlayers()) do
+
+        if player ~= LocalPlayer then
+
+            createPlayerButton(player)
+
+        end
+
+    end
+
+    
+
+    -- Update canvas size
+
+    PlayerList.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+
+end
+
+-- Event connections
+
+Players.PlayerAdded:Connect(updatePlayerList)
+
+Players.PlayerRemoving:Connect(function(player)
+
+    if selectedPlayer == player then
+
+        cancelSelection()
+
+    end
+
+    updatePlayerList()
+
+end)
+
+CloseButton.MouseButton1Click:Connect(function()
+
+    stopFollowing()
+
+    Gui:Destroy()
+
+end)
+
+TeleportButton.MouseButton1Click:Connect(teleportToPlayer)
+
+FollowButton.MouseButton1Click:Connect(startFollowing)
+
+StopFollowButton.MouseButton1Click:Connect(stopFollowing)
+
+-- Initialize
+
+updatePlayerList()

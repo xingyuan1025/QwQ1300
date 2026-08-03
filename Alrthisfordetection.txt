@@ -1,0 +1,148 @@
+-- LocalScript di StarterPlayerScripts
+local player = game.Players.LocalPlayer
+
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "SoundDetector"
+gui.ResetOnSpawn = false
+
+-- Main frame
+local frame = Instance.new("Frame")
+frame.Name = "MainFrame"
+frame.Size = UDim2.new(0, 520, 0, 400)
+frame.Position = UDim2.new(0.5, -260, 0.5, -200)
+frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+frame.BorderSizePixel = 2
+frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+frame.Parent = gui
+frame.Active = true
+frame.Draggable = true
+
+-- Title
+local title = Instance.new("TextLabel", frame)
+title.Text = "音频SPY 🎵"
+title.Size = UDim2.new(1, -100, 0, 30)
+title.Position = UDim2.new(0, 10, 0, 10)
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(0, 0, 0)
+title.Font = Enum.Font.SourceSansBold
+title.TextScaled = true
+
+-- Made by
+local madeby = Instance.new("TextLabel", frame)
+madeby.Text = "Kenny🤓"
+madeby.Size = UDim2.new(0, 100, 0, 20)
+madeby.Position = UDim2.new(1, -110, 1, -25)
+madeby.BackgroundTransparency = 1
+madeby.TextColor3 = Color3.fromRGB(120, 120, 120)
+madeby.Font = Enum.Font.SourceSansItalic
+madeby.TextScaled = true
+
+-- Minimize/Maximize
+local toggle = Instance.new("TextButton", frame)
+toggle.Size = UDim2.new(0, 40, 0, 30)
+toggle.Position = UDim2.new(1, -45, 0, 10)
+toggle.Text = "-"
+toggle.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+toggle.TextScaled = true
+toggle.Font = Enum.Font.SourceSansBold
+
+-- Refresh
+local refresh = Instance.new("TextButton", frame)
+refresh.Text = "刷新"
+refresh.Size = UDim2.new(0, 120, 0, 35)
+refresh.Position = UDim2.new(0.5, -60, 1, -45)
+refresh.BackgroundColor3 = Color3.fromRGB(180, 220, 255)
+refresh.TextScaled = true
+refresh.Font = Enum.Font.SourceSansBold
+refresh.BorderColor3 = Color3.fromRGB(0, 0, 0)
+refresh.Parent = frame
+
+-- Scroll area
+local scroll = Instance.new("ScrollingFrame", frame)
+scroll.Size = UDim2.new(1, -20, 1, -90)
+scroll.Position = UDim2.new(0, 10, 0, 50)
+scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+scroll.ScrollBarThickness = 8
+scroll.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+scroll.BorderColor3 = Color3.fromRGB(0, 0, 0)
+scroll.Parent = frame
+
+local layout = Instance.new("UIListLayout", scroll)
+layout.Padding = UDim.new(0, 5)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
+end)
+
+-- Toggle logic
+local minimized = false
+toggle.MouseButton1Click:Connect(function()
+	minimized = not minimized
+	scroll.Visible = not minimized
+	refresh.Visible = not minimized
+	toggle.Text = minimized and "+" or "-"
+	frame.Size = minimized and UDim2.new(0, 520, 0, 60) or UDim2.new(0, 520, 0, 400)
+end)
+
+-- Copy helper
+local function copy(text)
+	if setclipboard then
+		setclipboard(text)
+	end
+end
+
+-- Clear previous
+local function clear()
+	for _, v in ipairs(scroll:GetChildren()) do
+		if v:IsA("Frame") then v:Destroy() end
+	end
+end
+
+-- Update Sound List
+local function update()
+	clear()
+	local allSounds = {}
+	for _, obj in ipairs(game:GetDescendants()) do
+		if obj:IsA("Sound") and obj.SoundId ~= "" then
+			table.insert(allSounds, obj)
+		end
+	end
+
+	for _, sound in ipairs(allSounds) do
+		local row = Instance.new("Frame", scroll)
+		row.Size = UDim2.new(1, 0, 0, 50)
+		row.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		row.BorderColor3 = Color3.fromRGB(0, 0, 0)
+
+		local label = Instance.new("TextLabel", row)
+		label.Size = UDim2.new(0.7, -10, 1, 0)
+		label.Position = UDim2.new(0, 5, 0, 0)
+		label.BackgroundTransparency = 1
+		label.Text = sound.Name .. " | " .. sound.SoundId
+		label.TextXAlignment = Enum.TextXAlignment.Left
+		label.TextScaled = true
+		label.Font = Enum.Font.SourceSans
+		label.TextColor3 = Color3.fromRGB(0, 0, 0)
+
+		local copyBtn = Instance.new("TextButton", row)
+		copyBtn.Text = "复制"
+		copyBtn.Size = UDim2.new(0.3, -10, 0.8, 0)
+		copyBtn.Position = UDim2.new(0.7, 5, 0.1, 0)
+		copyBtn.BackgroundColor3 = Color3.fromRGB(200, 255, 200)
+		copyBtn.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		copyBtn.TextScaled = true
+		copyBtn.Font = Enum.Font.SourceSansBold
+
+		copyBtn.MouseButton1Click:Connect(function()
+			copy(sound.SoundId)
+		end)
+	end
+end
+
+-- Connect refresh
+refresh.MouseButton1Click:Connect(update)
+
+-- Initial update
+update()

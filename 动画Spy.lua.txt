@@ -1,0 +1,177 @@
+local players = game:GetService("Players")
+local uis = game:GetService("UserInputService")
+
+local lp = players.LocalPlayer
+local char = lp.Character or lp.CharacterAdded:Wait()
+local hum = char:WaitForChild("Humanoid")
+
+-- gui setup
+local gui = Instance.new("ScreenGui")
+gui.Name = "animspy"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+gui.Parent = game:GetService("CoreGui")
+
+-- main window
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 420, 0, 350)
+main.Position = UDim2.new(0, 60, 0, 120)
+main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+main.BorderSizePixel = 0
+main.ClipsDescendants = true
+main.Parent = gui
+
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+
+-- title bar
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 36)
+title.BackgroundTransparency = 1
+title.Text = "🎞️ 动画 spy"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.new(1, 1, 1)
+title.TextXAlignment = Enum.TextXAlignment.Center
+title.Parent = main
+
+-- drag if left click on top bar
+local dragging = false
+local offset = Vector2.zero
+title.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		offset = Vector2.new(input.Position.X - main.AbsolutePosition.X, input.Position.Y - main.AbsolutePosition.Y)
+	end
+end)
+
+uis.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
+
+uis.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		main.Position = UDim2.new(0, input.Position.X - offset.X, 0, input.Position.Y - offset.Y)
+	end
+end)
+
+-- resize grip
+local grip = Instance.new("Frame")
+grip.Size = UDim2.new(0, 14, 0, 14)
+grip.Position = UDim2.new(1, -16, 1, -16)
+grip.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+grip.BorderSizePixel = 0
+grip.Parent = main
+Instance.new("UICorner", grip).CornerRadius = UDim.new(1, 0)
+
+-- resize drag
+local resizing = false
+grip.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		resizing = true
+	end
+end)
+
+uis.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		resizing = false
+	end
+end)
+
+uis.InputChanged:Connect(function(input)
+	if resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local mouse = uis:GetMouseLocation()
+		local size = Vector2.new(mouse.X - main.AbsolutePosition.X, mouse.Y - main.AbsolutePosition.Y)
+		main.Size = UDim2.new(0, math.clamp(size.X, 300, 700), 0, math.clamp(size.Y, 200, 600))
+	end
+end)
+
+-- scroll area
+local scroll = Instance.new("ScrollingFrame")
+scroll.Size = UDim2.new(1, -20, 1, -46)
+scroll.Position = UDim2.new(0, 10, 0, 40)
+scroll.BackgroundTransparency = 1
+scroll.BorderSizePixel = 0
+scroll.CanvasSize = UDim2.new()
+scroll.ScrollBarThickness = 5
+scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+scroll.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+scroll.Parent = main
+
+local layout = Instance.new("UIListLayout", scroll)
+layout.Padding = UDim.new(0, 6)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- make animation row
+local function addRow(name, id)
+	local row = Instance.new("Frame")
+	row.Size = UDim2.new(1, 0, 0, 32)
+	row.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	row.BorderSizePixel = 0
+	row.Parent = scroll
+	Instance.new("UICorner", row).CornerRadius = UDim.new(0, 6)
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(0.4, -6, 1, 0)
+	label.Position = UDim2.new(0, 6, 0, 0)
+	label.BackgroundTransparency = 1
+	label.Text = name
+	label.Font = Enum.Font.Gotham
+	label.TextSize = 14
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = row
+
+	local idBtn = Instance.new("TextButton")
+	idBtn.Size = UDim2.new(0.4, -6, 1, 0)
+	idBtn.Position = UDim2.new(0.4, 6, 0, 0)
+	idBtn.BackgroundTransparency = 1
+	idBtn.Text = id
+	idBtn.Font = Enum.Font.Gotham
+	idBtn.TextSize = 14
+	idBtn.TextColor3 = Color3.fromRGB(170, 170, 170)
+	idBtn.TextXAlignment = Enum.TextXAlignment.Left
+	idBtn.Parent = row
+	idBtn.MouseButton1Click:Connect(function()
+		setclipboard(id)
+	end)
+
+	local playBtn = Instance.new("TextButton")
+	playBtn.Size = UDim2.new(0.2, -8, 0.8, 0)
+	playBtn.Position = UDim2.new(0.8, 4, 0.1, 0)
+	playBtn.BackgroundColor3 = Color3.fromRGB(85, 170, 255)
+	playBtn.Text = "▶"
+	playBtn.Font = Enum.Font.GothamBold
+	playBtn.TextSize = 14
+	playBtn.TextColor3 = Color3.new(1, 1, 1)
+	playBtn.Parent = row
+	Instance.new("UICorner", playBtn).CornerRadius = UDim.new(1, 0)
+
+	playBtn.MouseButton1Click:Connect(function()
+		local anim = Instance.new("Animation")
+		anim.AnimationId = id
+		local track = hum:LoadAnimation(anim)
+		track:Play()
+	end)
+end
+
+-- log animations from localplayer only
+local seen = {}
+hum.AnimationPlayed:Connect(function(track)
+	local anim = track.Animation
+	if anim and anim.AnimationId and not seen[anim.AnimationId] then
+		seen[anim.AnimationId] = true
+		addRow(anim.Name ~= "" and anim.Name or "animation", anim.AnimationId)
+	end
+end)
+
+-- toggle with right shift
+local showing = true
+uis.InputBegan:Connect(function(i, g)
+	if not g and i.KeyCode == Enum.KeyCode.RightShift then
+		showing = not showing
+		main.Visible = showing
+	end
+end)
