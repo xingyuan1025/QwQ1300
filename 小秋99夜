@@ -1,4 +1,4 @@
--- XingYuan Hub | 99 Nights in Forest（汉化版）
+-- XingYuan Hub | 99 Nights in Forest  【加入 QQ 群了解更多1026783447 https://qun.qq.com/universal-share/share?ac=1&authKey=pH8OiRLZKhRKGkB1x2khHAQBK6hj4vDa3nKDRtG%2FtsrO1n7bM67i8Hr9%2FL7uR%2FLE&busi_data=eyJncm91cENvZGUiOiIxMDI2NzgzNDQ3IiwidG9rZW4iOiI0TDJiclJqMVAvNm5MTkExTkNjYjNMK3Q5d2RMTE1vdUs1NVhqMkFSdzY4N0htaWZJSlU4RVRoaUZhQmlnQUIzIiwidWluIjoiNTQzMzI1NzA0In0%3D&data=FBrmhrp4PNsJMzzACNJNT3GaSMZ9xupbCUnBP4kE55paEG1vcUxJ8acxT9pZYX1-KMcf7LN8tC6zQ062vf46hg&svctype=4&tempid=h5_group_info】
 -- 仅用于 Roblox Studio 本地学习，请勿在在线服务器运行
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
@@ -9,6 +9,50 @@ local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
+
+-- ========== 物品/生物名称汉化映射（显示层翻译，游戏内匹配仍用英文） ==========
+local ITEM_CN = {
+    ["Apple"] = "苹果", ["Berry"] = "浆果", ["Carrot"] = "胡萝卜", ["Cake"] = "蛋糕",
+    ["Chili"] = "辣椒", ["Cooked Morsel"] = "熟肉条", ["Cooked Steak"] = "熟牛排",
+    ["Steak"] = "生牛排", ["Morsel"] = "生肉条", ["Elvis Steak"] = "猫王牛排",
+    ["Log"] = "原木", ["Chair"] = "椅子", ["Metal Chair"] = "金属椅",
+    ["Coal"] = "煤炭", ["Fuel Canister"] = "燃料罐", ["Oil Barrel"] = "油桶",
+    ["Biofuel"] = "生物燃料", ["Tyre"] = "轮胎", ["Bolt"] = "螺栓",
+    ["Broken Fan"] = "坏风扇", ["Broken Microwave"] = "坏微波炉", ["Sheet Metal"] = "金属板",
+    ["Old Radio"] = "旧收音机", ["Washing Machine"] = "洗衣机", ["Old Car Engine"] = "旧汽车引擎",
+    ["Old Flashlight"] = "旧手电筒", ["Bandage"] = "绷带", ["MedKit"] = "医疗包",
+    ["MadKit"] = "狂暴药包", ["Coin Stack"] = "硬币堆", ["Revolver"] = "左轮手枪",
+    ["Revolver Ammo"] = "左轮子弹", ["Rifle"] = "步枪", ["Rifle Ammo"] = "步枪子弹",
+    ["Leather Armor"] = "皮甲", ["Leather Body"] = "皮甲", ["Iron Body"] = "铁甲",
+    ["Giant Sack"] = "大背包", ["Good Sack"] = "好背包",
+    ["Strong Axe"] = "强斧", ["Good Axe"] = "好斧",
+}
+local MOB_CN = {
+    ["Bunny"] = "兔子", ["Wolf"] = "狼", ["Alpha Wolf"] = "狼王",
+    ["Bear"] = "熊", ["Cultist"] = "教徒", ["Crossbow Cultist"] = "弩手教徒",
+    ["Alien"] = "外星人",
+}
+local NAME_CN = {}
+for k, v in pairs(ITEM_CN) do NAME_CN[k] = v end
+for k, v in pairs(MOB_CN) do NAME_CN[k] = v end
+
+local function toCN(en) return NAME_CN[en] or en end
+local function toEN(cn)
+    for en, c in pairs(NAME_CN) do
+        if c == cn then return en end
+    end
+    return cn
+end
+local function toCNList(arr)
+    local out = {}
+    for _, v in ipairs(arr) do table.insert(out, toCN(v)) end
+    return out
+end
+local function toENList(arr)
+    local out = {}
+    for _, v in ipairs(arr) do table.insert(out, toEN(v)) end
+    return out
+end
 
 -- ========== 主题（美化配色） ==========
 WindUI:AddTheme({
@@ -124,6 +168,8 @@ local ie = {
     "Morsel", "Sheet Metal", "Steak", "Tyre", "Washing Machine"
 }
 local me = {"Bunny", "Wolf", "Alpha Wolf", "Bear", "Cultist", "Crossbow Cultist", "Alien"}
+local ieCN = toCNList(ie)
+local meCN = toCNList(me)
 
 -- ========== 拾取 ==========
 local junkItems = {"Tyre", "Bolt", "Broken Fan", "Broken Microwave", "Sheet Metal", "Old Radio", "Washing Machine", "Old Car Engine"}
@@ -939,11 +985,11 @@ Tabs.Main:Section({ Title = "自动进食", Icon = "utensils" })
 Tabs.Main:Dropdown({
     Title = "选择食物",
     Desc = "勾选需要的食物",
-    Values = alimentos,
+    Values = toCNList(alimentos),
     Value = selectedFood,
     Multi = true,
     Callback = function(value)
-        selectedFood = value
+        selectedFood = toENList(value)
     end
 })
 
@@ -1069,11 +1115,11 @@ Tabs.Auto:Section({ Title = "自动升级营火", Icon = "flame" })
 Tabs.Auto:Dropdown({
     Title = "选择燃料",
     Desc = "选择要添加的燃料",
-    Values = campfireFuelItems,
+    Values = toCNList(campfireFuelItems),
     Multi = false,
     AllowNone = true,
     Callback = function(option)
-        selectedCampfireItem = option
+        selectedCampfireItem = option and toEN(option) or nil
     end
 })
 
@@ -1104,11 +1150,11 @@ Tabs.Auto:Section({ Title = "自动分解物品", Icon = "cog" })
 Tabs.Auto:Dropdown({
     Title = "选择分解物",
     Desc = "选择要分解的物品",
-    Values = scrapjunkItems,
+    Values = toCNList(scrapjunkItems),
     Multi = false,
     AllowNone = true,
     Callback = function(option)
-        selectedScrapItem = option
+        selectedScrapItem = option and toEN(option) or nil
     end
 })
 
@@ -1138,12 +1184,13 @@ Tabs.Auto:Section({ Title = "自动烹饪食物", Icon = "flame" })
 
 Tabs.Auto:Dropdown({
     Title = "选择食材",
-    Values = autocookItems,
+    Values = toCNList(autocookItems),
     Multi = true,
     AllowNone = true,
     Callback = function(options)
+        local enList = toENList(options)
         for _, itemName in ipairs(autocookItems) do
-            autoCookEnabledItems[itemName] = table.find(options, itemName) ~= nil
+            autoCookEnabledItems[itemName] = table.find(enList, itemName) ~= nil
         end
     end
 })
@@ -1302,11 +1349,11 @@ Tabs.br:Section({ Title = "杂物", Icon = "box" })
 Tabs.br:Dropdown({
     Title = "选择杂物",
     Desc = "勾选要拾取的物品",
-    Values = junkItems,
+    Values = toCNList(junkItems),
     Multi = true,
     AllowNone = true,
     Callback = function(options)
-        selectedJunkItems = options
+        selectedJunkItems = toENList(options)
     end
 })
 
@@ -1348,11 +1395,11 @@ Tabs.br:Section({ Title = "燃料", Icon = "flame" })
 Tabs.br:Dropdown({
     Title = "选择燃料",
     Desc = "勾选要拾取的物品",
-    Values = fuelItems,
+    Values = toCNList(fuelItems),
     Multi = true,
     AllowNone = true,
     Callback = function(options)
-        selectedFuelItems = options
+        selectedFuelItems = toENList(options)
     end
 })
 
@@ -1394,11 +1441,11 @@ Tabs.br:Section({ Title = "食物", Icon = "utensils" })
 Tabs.br:Dropdown({
     Title = "选择食物",
     Desc = "勾选要拾取的物品",
-    Values = foodItems,
+    Values = toCNList(foodItems),
     Multi = true,
     AllowNone = true,
     Callback = function(options)
-        selectedFoodItems = options
+        selectedFoodItems = toENList(options)
     end
 })
 
@@ -1440,11 +1487,11 @@ Tabs.br:Section({ Title = "医疗用品", Icon = "bandage" })
 Tabs.br:Dropdown({
     Title = "选择医疗品",
     Desc = "勾选要拾取的物品",
-    Values = medicalItems,
+    Values = toCNList(medicalItems),
     Multi = true,
     AllowNone = true,
     Callback = function(options)
-        selectedMedicalItems = options
+        selectedMedicalItems = toENList(options)
     end
 })
 
@@ -1486,11 +1533,11 @@ Tabs.br:Section({ Title = "装备", Icon = "sword" })
 Tabs.br:Dropdown({
     Title = "选择装备",
     Desc = "勾选要拾取的物品",
-    Values = equipmentItems,
+    Values = toCNList(equipmentItems),
     Multi = true,
     AllowNone = true,
     Callback = function(options)
-        selectedEquipmentItems = options
+        selectedEquipmentItems = toENList(options)
     end
 })
 
@@ -1684,11 +1731,12 @@ local function Aesp(nome, tipo)
     end
     if not container then return end
 
+    local enName = toEN(nome)  -- 中文显示名 → 英文游戏名
     for _, obj in ipairs(container:GetChildren()) do
-        if obj.Name == nome then
+        if obj.Name == enName then
             local part = obj:IsA("BasePart") and obj or obj:FindFirstChildWhichIsA("BasePart")
             if part then
-                createESPText(part, obj.Name, color)
+                createESPText(part, toCN(obj.Name), color)  -- 标签显示中文
             end
         end
     end
@@ -1705,8 +1753,9 @@ local function Desp(nome, tipo)
     end
     if not container then return end
 
+    local enName = toEN(nome)
     for _, obj in ipairs(container:GetChildren()) do
-        if obj.Name == nome then
+        if obj.Name == enName then
             local part = obj:IsA("BasePart") and obj or obj:FindFirstChildWhichIsA("BasePart")
             if part then
                 for _, gui in ipairs(part:GetChildren()) do
@@ -1729,23 +1778,23 @@ Tabs.esp:Section({ Title = "物品透视", Icon = "package" })
 
 Tabs.esp:Dropdown({
     Title = "选择物品",
-    Values = ie,
+    Values = ieCN,
     Value = {},
     Multi = true,
     AllowNone = true,
     Callback = function(options)
         selectedItems = options
         if espItemsEnabled then
-            for _, name in ipairs(ie) do
-                if table.find(selectedItems, name) then
-                    Aesp(name, "item")
+            for _, cn in ipairs(ieCN) do
+                if table.find(selectedItems, cn) then
+                    Aesp(cn, "item")
                 else
-                    Desp(name, "item")
+                    Desp(cn, "item")
                 end
             end
         else
-            for _, name in ipairs(ie) do
-                Desp(name, "item")
+            for _, cn in ipairs(ieCN) do
+                Desp(cn, "item")
             end
         end
     end
@@ -1756,11 +1805,11 @@ Tabs.esp:Toggle({
     Value = false,
     Callback = function(state)
         espItemsEnabled = state
-        for _, name in ipairs(ie) do
-            if state and table.find(selectedItems, name) then
-                Aesp(name, "item")
+        for _, cn in ipairs(ieCN) do
+            if state and table.find(selectedItems, cn) then
+                Aesp(cn, "item")
             else
-                Desp(name, "item")
+                Desp(cn, "item")
             end
         end
 
@@ -1769,10 +1818,10 @@ Tabs.esp:Toggle({
                 local container = workspace:FindFirstChild("Items")
                 if container then
                     espConnections["Items"] = container.ChildAdded:Connect(function(obj)
-                        if table.find(selectedItems, obj.Name) then
+                        if table.find(selectedItems, toCN(obj.Name)) then
                             local part = obj:IsA("BasePart") and obj or obj:FindFirstChildWhichIsA("BasePart")
                             if part then
-                                createESPText(part, obj.Name, Color3.fromRGB(0, 255, 0))
+                                createESPText(part, toCN(obj.Name), Color3.fromRGB(0, 255, 0))
                             end
                         end
                     end)
@@ -1791,23 +1840,23 @@ Tabs.esp:Section({ Title = "生物透视", Icon = "user" })
 
 Tabs.esp:Dropdown({
     Title = "选择生物",
-    Values = me,
+    Values = meCN,
     Value = {},
     Multi = true,
     AllowNone = true,
     Callback = function(options)
         selectedMobs = options
         if espMobsEnabled then
-            for _, name in ipairs(me) do
-                if table.find(selectedMobs, name) then
-                    Aesp(name, "mob")
+            for _, cn in ipairs(meCN) do
+                if table.find(selectedMobs, cn) then
+                    Aesp(cn, "mob")
                 else
-                    Desp(name, "mob")
+                    Desp(cn, "mob")
                 end
             end
         else
-            for _, name in ipairs(me) do
-                Desp(name, "mob")
+            for _, cn in ipairs(meCN) do
+                Desp(cn, "mob")
             end
         end
     end
@@ -1818,11 +1867,11 @@ Tabs.esp:Toggle({
     Value = false,
     Callback = function(state)
         espMobsEnabled = state
-        for _, name in ipairs(me) do
-            if state and table.find(selectedMobs, name) then
-                Aesp(name, "mob")
+        for _, cn in ipairs(meCN) do
+            if state and table.find(selectedMobs, cn) then
+                Aesp(cn, "mob")
             else
-                Desp(name, "mob")
+                Desp(cn, "mob")
             end
         end
 
@@ -1831,10 +1880,10 @@ Tabs.esp:Toggle({
                 local container = workspace:FindFirstChild("Characters")
                 if container then
                     espConnections["Mobs"] = container.ChildAdded:Connect(function(obj)
-                        if table.find(selectedMobs, obj.Name) then
+                        if table.find(selectedMobs, toCN(obj.Name)) then
                             local part = obj:IsA("BasePart") and obj or obj:FindFirstChildWhichIsA("BasePart")
                             if part then
-                                createESPText(part, obj.Name, Color3.fromRGB(255, 255, 0))
+                                createESPText(part, toCN(obj.Name), Color3.fromRGB(255, 255, 0))
                             end
                         end
                     end)
