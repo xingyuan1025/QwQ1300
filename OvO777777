@@ -862,7 +862,7 @@ local Window = WindUI:CreateWindow({
     Title = "99 Nights in forest | XingYuan Hub",
     Icon = "zap",
     Author = "XingYuan Scripts",
-    Folder = "Chasesdd Hub",
+    Folder = "XingYuan Hub",
     Size = UDim2.fromOffset(500, 350),
     Transparent = getgenv().TransparencyEnabled,
     Theme = "Dark",
@@ -942,48 +942,48 @@ local Tabs = {}
 Tabs.Combat = Window:Tab({
     Title = "Combat",
     Icon = "sword",
-    Desc = "Chasesdd"
+    Desc = "XingYuan"
 })
 Tabs.Main = Window:Tab({
     Title = "Main",
     Icon = "align-left",
-    Desc = "Chasesdd"
+    Desc = "XingYuan"
 })
 Tabs.Auto = Window:Tab({
     Title = "Auto",
     Icon = "wrench",
-    Desc = "Chasesdd"
+    Desc = "XingYuan"
 })
 
 Tabs.esp = Window:Tab({
     Title = "Esp",
     Icon = "sparkles",
-    Desc = "Chasesdd"
+    Desc = "XingYuan"
 })
 Tabs.br = Window:Tab({
     Title = "Bring",
     Icon = "package",
-    Desc = "Chasesdd"
+    Desc = "XingYuan"
 })
 Tabs.Tp = Window:Tab({
     Title = "Teleport",
     Icon = "map",
-    Desc = "Chasesdd"
+    Desc = "XingYuan"
 })
 Tabs.Fly = Window:Tab({
     Title = "Player",
     Icon = "user",
-    Desc = "Chasesdd"
+    Desc = "XingYuan"
 })
 Tabs.Vision= Window:Tab({
     Title = "Environment",
     Icon = "eye",
-    Desc = "Chasesdd"
+    Desc = "XingYuan"
 })
 Tabs.Info = Window:Tab({
     Title = "Information",
     Icon = "badge-info",
-    Desc = "Chasesdd"
+    Desc = "XingYuan"
 })
 
 Window:SelectTab(9)
@@ -2182,8 +2182,8 @@ end
 -- Remove this line completely: Info = InfoTab
 -- The Info variable is already correctly set above
 
-local InviteCode = "38M6yaJRek"
-local DiscordAPI = "https://discord.com/api/v10/invites/" .. InviteCode .. "?with_counts=true&with_expiration=true"
+local InviteCode = "dg86b7r6"
+local DiscordAPI = "https://discord.gg/dg86b7r6" .. InviteCode .. "?with_counts=true&with_expiration=true"
 
 local function LoadDiscordInfo()
     local success, result = pcall(function()
@@ -2242,7 +2242,7 @@ local function LoadDiscordInfo()
         Info:Button({
             Title = "Copy Discord Invite",
             Callback = function()
-                setclipboard("https://discord.gg/" .. InviteCode)
+                setclipboard("https://discord.gg/dg86b7r6)
                 WindUI:Notify({
                     Title = "Copied!",
                     Content = "Discord invite copied to clipboard",
@@ -2267,7 +2267,7 @@ LoadDiscordInfo()
 
 Info:Divider()
 Info:Section({ 
-    Title = "Chasesdd Hub",
+    Title = "XingYuan Hub",
     TextXAlignment = "Center",
     TextSize = 17,
 })
@@ -2275,7 +2275,7 @@ Info:Divider()
 
 local Owner = Info:Paragraph({
     Title = "Main Founder",
-    Desc = "Chasesdd",
+    Desc = "XingYuan",
     Image = "rbxassetid://109219709724036",
     ImageSize = 30,
     Thumbnail = "",
@@ -2284,8 +2284,8 @@ local Owner = Info:Paragraph({
 })
 
 local CoOwner = Info:Paragraph({
-    Title = "Chasesdd Hub",
-    Desc = "Developed by Chasesdd",
+    Title = "XingYuan Hub",
+    Desc = "Developed by XingYuan",
     Image = "rbxassetid://109219709724036",
     ImageSize = 30,
     Thumbnail = "",
@@ -2306,7 +2306,7 @@ local Discord = Info:Paragraph({
             Icon = "copy",
             Title = "Copy Link",
             Callback = function()
-                setclipboard("https://discord.gg/PAy8Ht3SDC")
+                setclipboard("https://discord.gg/dg86b7r6")
                 print("Copied discord link to clipboard!")
             end,
         }
