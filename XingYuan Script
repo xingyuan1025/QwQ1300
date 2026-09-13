@@ -1,6 +1,7 @@
+-- XY Script | 小秋 | XingYuan 工作室开发 | repaired build
 if game.GameId == 7709344486 then  --- Doors Lobby
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", -- Required
+	Title = "XY Script：", -- Required
 	Text = "正在加载...偷走脑红...", -- Required
 	Icon = "rbxassetid://119970903874014" -- Optional
 })
@@ -82,7 +83,7 @@ subtitleLabel.Name = "Subtitle"
 subtitleLabel.Size = UDim2.new(1, -20, 0, 15)
 subtitleLabel.Position = UDim2.new(0, 10, 0, 40)
 subtitleLabel.BackgroundTransparency = 1
-subtitleLabel.Text = "XY Script付费版"
+subtitleLabel.Text = "XY Script"
 subtitleLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 subtitleLabel.TextSize = 12
 subtitleLabel.Font = Enum.Font.Gotham
@@ -428,13 +429,13 @@ ProximityPromptService.PromptTriggered:Connect(function(prompt, plr)
     end)
 end)
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
 elseif game.GameId == 2440500124 then  --- Doors Lobby
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", -- Required
+	Title = "XY Script：", -- Required
 	Text = "正在加载...Doors...", -- Required
 	Icon = "rbxassetid://119970903874014" -- Optional
 })
@@ -518,7 +519,7 @@ end
 local Confirmed = false
 
 WindUI:Popup({
-    Title = gradient("RbScript Hub", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
+    Title = gradient("XY Script", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
     Icon = "sparkles",
     IconThemed = true,
     Content = "欢迎使用付费版！",
@@ -538,7 +539,7 @@ WindUI:Popup({
     }
 })
 
-repeat wait() until Confirmed
+-- Confirmation popup is non-blocking in the repaired build
 
 local UserGui = Instance.new("ScreenGui", game.CoreGui)
 local UserLabel = Instance.new("TextLabel", UserGui)
@@ -554,7 +555,7 @@ UserLabel.BorderColor3 = Color3.new(0, 0, 0)
 UserLabel.Position = UDim2.new(0.80, 0.80, 0.00090, 0)
 UserLabel.Size = UDim2.new(0, 135, 0, 50)
 UserLabel.Font = Enum.Font.GothamSemibold
-UserLabel.Text = "尊敬的："..game.Players.LocalPlayer.Character.Name.."付费版用户，欢迎使用XY Script！"
+UserLabel.Text = "尊敬的："..((game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.Name) or game.Players.LocalPlayer.Name).."用户，欢迎使用XY Script！"
 UserLabel.TextColor3 = Color3.new(1, 1, 1)
 UserLabel.TextScaled = true
 UserLabel.TextSize = 14
@@ -585,7 +586,7 @@ tween:Play()
 local Window = WindUI:CreateWindow({
     Title = ((isHotel and "XY Script | 酒店") or (isMines and "XY Script | 矿井") or (isBackdoor and "XY Script | 后门")),
     Icon = "rbxassetid://105933835532108",
-    Author = "付费版 Yungengxin",
+    Author = "小秋 · XingYuan 工作室开发",
     Folder = "脚本中心",
     Size = UDim2.fromOffset(480, 360),
     Theme = "Dark",
@@ -875,7 +876,7 @@ TabHandles.xx:Code({
 
 TabHandles.xx:Code({
     Title = "XY Script交流群（Discord群）",
-    Code = [[https://discord.gg/dg86b7r6]],
+    Code = [[https://discord.gg/qZmW3PYd9T]],
 })
 
 
@@ -902,8 +903,8 @@ task.wait()
 end
         WindUI:Notify({
             Title = "XY Script：",
-            Content = state and "已开启速度" or "已关闭速度",
-            Icon = state and "check" or "x",
+            Content = Value and "已开启速度" or "已关闭速度",
+            Icon = Value and "check" or "x",
             Duration = 2
         })
     end
@@ -1154,7 +1155,7 @@ local gnSlider = TabHandles.gn:Slider({
     Title = "自动捡钥匙距离",
     Value = { Min = 0, Max = 15, Default = 15 },
     Callback = function(val)
-        val = keyrange
+        keyrange = val
     end
 })
 
@@ -1162,7 +1163,7 @@ local gnSlider = TabHandles.gn:Slider({
     Title = "自动拉拉杆距离",
     Value = { Min = 0, Max = 15, Default = 15 },
     Callback = function(val)
-        val = leverrange
+        leverrange = val
     end
 })
 
@@ -1170,7 +1171,7 @@ local gnSlider = TabHandles.gn:Slider({
     Title = "自动拾起书距离",
     Value = { Min = 0, Max = 15, Default = 15 },
     Callback = function(val)
-        val = bookrange
+        bookrange = val
     end
 })
 
@@ -2964,7 +2965,7 @@ else
 end
 
 
-local footerSection = Window:Section({ Title = "XY Script_付费版" })
+local footerSection = Window:Section({ Title = "XY Script" })
 
 Window:OnClose(function()
     print("Window closed")
@@ -2981,13 +2982,13 @@ Window:OnDestroy(function()
     print("Window destroyed")
 end)
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
 elseif game.GameId == 2820580801 then  --- Doors Lobby
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", -- Required
+	Title = "XY Script：", -- Required
 	Text = "正在加载...俄亥俄州...", -- Required
 	Icon = "rbxassetid://119970903874014" -- Optional
 })
@@ -3017,7 +3018,7 @@ local Players    = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local SnowRUN = game:GetService("RunService")
 local b1 = require(game:GetService('ReplicatedStorage').devv).load('v3item').inventory.items
-local window = library:new("XY Script_付费版")
+local window = library:new("XY Script")
 local tab = window:Tab("封禁信息")
 local section = tab:section("封禁信息", true)
 local banReasonLabel = section:Label("封禁原因：无")
@@ -3851,13 +3852,13 @@ local function StopAnim()
 end
 
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
 elseif game.GameId == 7008097940 then 
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "正在加载...墨水游戏...", 
 	Icon = "rbxassetid://119970903874014" 
 })
@@ -3947,7 +3948,7 @@ UserLabel.BorderColor3 = Color3.new(0, 0, 0)
 UserLabel.Position = UDim2.new(0.80, 0.80, 0.00090, 0)
 UserLabel.Size = UDim2.new(0, 135, 0, 50)
 UserLabel.Font = Enum.Font.GothamSemibold
-UserLabel.Text = "尊敬的："..game.Players.LocalPlayer.Character.Name.."付费版用户，欢迎使用XY Script！"
+UserLabel.Text = "尊敬的："..((game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.Name) or game.Players.LocalPlayer.Name).."用户，欢迎使用XY Script！"
 UserLabel.TextColor3 = Color3.new(1, 1, 1)
 UserLabel.TextScaled = true
 UserLabel.TextSize = 14
@@ -4867,10 +4868,10 @@ WindUI:Notify({
     Duration = 5
 })
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
 else
 local WindUI = loadstring(game:HttpGet("https://pastebin.com/raw/qYYUTE4g"))()
 
@@ -4930,7 +4931,7 @@ end
 local Confirmed = false
 
 WindUI:Popup({
-    Title = gradient("RbScript Hub", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
+    Title = gradient("XY Script", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
     Icon = "sparkles",
     IconThemed = true,
     Content = "欢迎使用付费版！",
@@ -4950,70 +4951,11 @@ WindUI:Popup({
     }}
 })
 
-WindUI.Services.LuarmorService = {
-    Name = "Luarmor 验证",
-    Icon = "key",
-    Args = {"ScriptId", "Discord"},
-    New = function(ScriptId, Discord)
-        print("初始化Luarmor服务: ScriptId=", ScriptId, "Discord=", Discord)
-        
-        -- 安全加载Luarmor库
-        local success, API = pcall(function()
-            return loadstring(game:HttpGet("https://sdkapi-public.luarmor.net/library.lua"))()
-        end)
-        
-        if not success or not API then
-            warn("无法加载Luarmor库: " .. tostring(API))
-            return {
-                Verify = function() return false, "服务初始化失败" end,
-                Copy = function() return "无法复制" end
-            }
-        end
-        
-        API.script_id = ScriptId
-        
-        return {
-            Verify = function(key)
-                print("验证卡密: " .. tostring(key))
-                local status = API.check_key(key)
-                
-                if not status then
-                    warn("验证API返回nil")
-                    return false, "验证服务无响应"
-                end
-                
-                print("验证状态: ", status.code, " - ", status.message)
-                
-                if status.code == "KEY_VALID" then
-                    return true, "验证成功"
-                elseif status.code == "KEY_HWID_LOCKED" then
-                    return false, "HWID不匹配，请通过Discord重置"
-                elseif status.code == "KEY_EXPIRED" then
-                    return false, "卡密已过期"
-                else
-                    return false, "卡密无效 (" .. (status.message or "未知错误") .. ")"
-                end
-            end,
-            
-            Copy = function()
-                print("复制Discord链接: " .. Discord)
-                if setclipboard then
-                    setclipboard(Discord)
-                elseif toclipboard then
-                    toclipboard(Discord)
-                else
-                    return "无法复制，注入器不支持剪贴板操作"
-                end
-                return "Discord链接已复制"
-            end
-        }
-    end
-}
 
 local Window = WindUI:CreateWindow({
     Title = "XY Script",
     Icon = "rbxassetid://105933835532108",
-    Author = "付费版 Yungengxin",
+    Author = "小秋 · XingYuan 工作室开发",
     Folder = "脚本中心",
     Size = UDim2.fromOffset(480, 360),
     Theme = "Dark",
@@ -5043,34 +4985,10 @@ local Window = WindUI:CreateWindow({
         end
     },
     SideBarWidth = 220,
-KeySystem = {
-        Note = "请输入您的卡密进行验证",
-        Thumbnail = {
-            Image = "rbxassetid://119970903874014",
-            Title = "XY Script"
-        },
-        API = {{
-            Type = "LuarmorService",  -- 使用新的服务名称
-            ScriptId = "6fa2f5b2bc6d2ae88b069bdb76c0e1e8",  -- 确保这是正确的ScriptId
-            Discord = "https://ads.luarmor.net/get_key?for=Rb_Script_HUB_FFB-AGCdDBQkFGED"  -- 确保这是正确的Discord链接
-        }},
-        SaveKey = false
-    },
     HideSearchBar = false,
     ScrollBarEnabled = true
 })
 
-if Window.KeySystem and Window.KeySystem.API then
-    local service = Window.KeySystem.API[1]
-    if service and service.Verify then
-        -- 在实际验证流程中，这里会调用service:Verify(key)
-        print("服务验证函数可用")
-    else
-        warn("服务验证函数不可用")
-    end
-else
-    warn("KeySystem API未正确初始化")
-end
 
 local UserGui = Instance.new("ScreenGui", game.CoreGui)
 local UserLabel = Instance.new("TextLabel", UserGui)
@@ -5086,8 +5004,8 @@ UserLabel.BorderColor3 = Color3.new(0, 0, 0)
 UserLabel.Position = UDim2.new(0.80, 0.80, 0.00090, 0)
 UserLabel.Size = UDim2.new(0, 135, 0, 50)
 UserLabel.Font = Enum.Font.GothamSemibold
-UserLabel.Text = "尊敬的：" .. game.Players.LocalPlayer.Character.Name ..
-                     "付费版用户，欢迎使用XY Script！"
+UserLabel.Text = "尊敬的：" .. ((game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.Name) or game.Players.LocalPlayer.Name) ..
+                     "用户，欢迎使用XY Script！"
 UserLabel.TextColor3 = Color3.new(1, 1, 1)
 UserLabel.TextScaled = true
 UserLabel.TextSize = 14
@@ -5136,7 +5054,7 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-local API_KEY = "sk-aa4018ed6a5745dc844fd78ef81a1c09"
+local API_KEY = "" -- Configure a secure server proxy; never place a secret in the client
 local MODEL = "deepseek-chat"
 
 local old = PlayerGui:FindFirstChild("CuteAI_ChatUI")
@@ -5480,6 +5398,9 @@ clearBtn.MouseButton1Click:Connect(clearChat)
 
 -- AI 调用
 local function callAI()
+    if API_KEY == "" then
+        return "AI 功能已停用：请使用安全的服务器中转，不要把 API Key 放在客户端脚本中。"
+    end
     local payload = {
         model = MODEL,
         messages = currentHistory
@@ -5832,7 +5753,7 @@ TabHandles.xx:Code({
 
 TabHandles.xx:Code({
     Title = "XY Script交流群（Discord群）",
-    Code = [[https://discord.gg/dg86b7r6]]
+    Code = [[https://discord.gg/qZmW3PYd9T]]
 })
 
 local intensitySlider = TabHandles.Elements:Slider({
@@ -6113,7 +6034,7 @@ TabHandles.gn:Button({
     Callback = function()
 if game.GameId == 3808081382 then  --- Doors Lobby
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", -- Required
+	Title = "XY Script：", -- Required
 	Text = "正在加载...最强战场...", -- Required
 	Icon = "rbxassetid://119970903874014" -- Optional
 })
@@ -6175,7 +6096,7 @@ end
 local Confirmed = false
 
 WindUI:Popup({
-    Title = gradient("RbScript Hub", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
+    Title = gradient("XY Script", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
     Icon = "sparkles",
     IconThemed = true,
     Content = "欢迎使用付费版！",
@@ -6195,7 +6116,7 @@ WindUI:Popup({
     }
 })
 
-repeat wait() until Confirmed
+-- Confirmation popup is non-blocking in the repaired build
 
 local UserGui = Instance.new("ScreenGui", game.CoreGui)
 local UserLabel = Instance.new("TextLabel", UserGui)
@@ -6211,7 +6132,7 @@ UserLabel.BorderColor3 = Color3.new(0, 0, 0)
 UserLabel.Position = UDim2.new(0.80, 0.80, 0.00090, 0)
 UserLabel.Size = UDim2.new(0, 135, 0, 50)
 UserLabel.Font = Enum.Font.GothamSemibold
-UserLabel.Text = "尊敬的："..game.Players.LocalPlayer.Character.Name.."付费版用户，欢迎使用XY Script！"
+UserLabel.Text = "尊敬的："..((game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.Name) or game.Players.LocalPlayer.Name).."用户，欢迎使用XY Script！"
 UserLabel.TextColor3 = Color3.new(1, 1, 1)
 UserLabel.TextScaled = true
 UserLabel.TextSize = 14
@@ -6244,7 +6165,7 @@ tween:Play()
 local Window = WindUI:CreateWindow({
     Title = "XY Script | 最强战场",
     Icon = "rbxassetid://105933835532108",
-    Author = "付费版 Yungengxin",
+    Author = "小秋 · XingYuan 工作室开发",
     Folder = "脚本中心",
     Size = UDim2.fromOffset(480, 360),
     Theme = "Dark",
@@ -6530,7 +6451,7 @@ TabHandles.xx:Code({
 
 TabHandles.xx:Code({
     Title = "XY Script交流群（Discord群）",
-    Code = [[https://discord.gg/dg86b7r6]],
+    Code = [[https://discord.gg/qZmW3PYd9T]],
 })
 
 local intensitySlider = TabHandles.Elements:Slider({
@@ -8324,7 +8245,7 @@ else
 end
 
 
-local footerSection = Window:Section({ Title = "XY Script_付费版" })
+local footerSection = Window:Section({ Title = "XY Script" })
 
 Window:OnClose(function()
     print("Window closed")
@@ -8341,13 +8262,13 @@ Window:OnDestroy(function()
     print("Window destroyed")
 end)
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
   elseif game.GameId == 7009714292 then 
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "正在加载...启示录...", 
 	Icon = "rbxassetid://119970903874014" 
 })
@@ -8411,7 +8332,7 @@ end
 local Confirmed = false
 
 WindUI:Popup({
-    Title = gradient("RbScript Hub", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
+    Title = gradient("XY Script", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
     Icon = "sparkles",
     IconThemed = true,
     Content = "欢迎使用付费版！",
@@ -8431,7 +8352,7 @@ WindUI:Popup({
     }
 })
 
-repeat wait() until Confirmed
+-- Confirmation popup is non-blocking in the repaired build
 
 local UserGui = Instance.new("ScreenGui", game.CoreGui)
 local UserLabel = Instance.new("TextLabel", UserGui)
@@ -8447,7 +8368,7 @@ UserLabel.BorderColor3 = Color3.new(0, 0, 0)
 UserLabel.Position = UDim2.new(0.80, 0.80, 0.00090, 0)
 UserLabel.Size = UDim2.new(0, 135, 0, 50)
 UserLabel.Font = Enum.Font.GothamSemibold
-UserLabel.Text = "尊敬的："..game.Players.LocalPlayer.Character.Name.."付费版用户，欢迎使用XY Script！"
+UserLabel.Text = "尊敬的："..((game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.Name) or game.Players.LocalPlayer.Name).."用户，欢迎使用XY Script！"
 UserLabel.TextColor3 = Color3.new(1, 1, 1)
 UserLabel.TextScaled = true
 UserLabel.TextSize = 14
@@ -8478,7 +8399,7 @@ tween:Play()
 local Window = WindUI:CreateWindow({
     Title = "XY Script | 启示录",
     Icon = "rbxassetid://105933835532108",
-    Author = "付费版 Yungengxin",
+    Author = "小秋 · XingYuan 工作室开发",
     Folder = "脚本中心",
     Size = UDim2.fromOffset(480, 360),
     Theme = "Dark",
@@ -8766,7 +8687,7 @@ TabHandles.xx:Code({
 
 TabHandles.xx:Code({
     Title = "XY Script交流群（Discord群）",
-    Code = [[https://discord.gg/dg86b7r6]],
+    Code = [[https://discord.gg/qZmW3PYd9T]],
 })
 
 local intensitySlider = TabHandles.Elements:Slider({
@@ -9665,7 +9586,7 @@ else
 end
 
 
-local footerSection = Window:Section({ Title = "XY Script_付费版" })
+local footerSection = Window:Section({ Title = "XY Script" })
 
 Window:OnClose(function()
     print("Window closed")
@@ -9682,13 +9603,13 @@ Window:OnDestroy(function()
     print("Window destroyed")
 end)
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
   elseif game.GameId == 7008097940 then 
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "正在加载...墨水游戏...", 
 	Icon = "rbxassetid://119970903874014" 
 })
@@ -9778,7 +9699,7 @@ UserLabel.BorderColor3 = Color3.new(0, 0, 0)
 UserLabel.Position = UDim2.new(0.80, 0.80, 0.00090, 0)
 UserLabel.Size = UDim2.new(0, 135, 0, 50)
 UserLabel.Font = Enum.Font.GothamSemibold
-UserLabel.Text = "尊敬的："..game.Players.LocalPlayer.Character.Name.."付费版用户，欢迎使用XY Script！"
+UserLabel.Text = "尊敬的："..((game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.Name) or game.Players.LocalPlayer.Name).."用户，欢迎使用XY Script！"
 UserLabel.TextColor3 = Color3.new(1, 1, 1)
 UserLabel.TextScaled = true
 UserLabel.TextSize = 14
@@ -10698,13 +10619,13 @@ WindUI:Notify({
     Duration = 5
 })
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
   elseif game.GameId == 7436755782 then 
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "正在加载...种植花园...", 
 	Icon = "rbxassetid://119970903874014" 
 })
@@ -10724,7 +10645,7 @@ UserLabel.BorderColor3 = Color3.new(0, 0, 0)
 UserLabel.Position = UDim2.new(0.80, 0.80, 0.00090, 0)
 UserLabel.Size = UDim2.new(0, 135, 0, 50)
 UserLabel.Font = Enum.Font.GothamSemibold
-UserLabel.Text = "尊敬的："..game.Players.LocalPlayer.Character.Name.."付费版用户，欢迎使用XY Script！"
+UserLabel.Text = "尊敬的："..((game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.Name) or game.Players.LocalPlayer.Name).."用户，欢迎使用XY Script！"
 UserLabel.TextColor3 = Color3.new(1, 1, 1)
 UserLabel.TextScaled = true
 UserLabel.TextSize = 14
@@ -10806,7 +10727,7 @@ end
 local Confirmed = false
 
 WindUI:Popup({
-    Title = gradient("RbScript Hub", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
+    Title = gradient("XY Script", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
     Icon = "sparkles",
     IconThemed = true,
     Content = "欢迎使用付费版！",
@@ -10828,7 +10749,7 @@ WindUI:Popup({
 local Window = WindUI:CreateWindow({
     Title = "XY Script",
     Icon = "rbxassetid://105933835532108",
-    Author = "付费版 Yungengxin",
+    Author = "小秋 · XingYuan 工作室开发",
     Folder = "脚本中心",
     Size = UDim2.fromOffset(480, 360),
     Theme = "Dark",
@@ -11426,7 +11347,7 @@ TabHandles.xx:Code({
 
 TabHandles.xx:Code({
     Title = "XY Script交流群（Discord群）",
-    Code = [[https://discord.gg/dg86b7r6]],
+    Code = [[https://discord.gg/qZmW3PYd9T]],
 })
 
 local intensitySlider = TabHandles.Elements:Slider({
@@ -11849,7 +11770,7 @@ else
 end
 
 
-local footerSection = Window:Section({ Title = "XY Script_付费版" })
+local footerSection = Window:Section({ Title = "XY Script" })
 
 Window:OnClose(function()
     print("Window closed")
@@ -11866,13 +11787,13 @@ Window:OnDestroy(function()
     print("Window destroyed")
 end)
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
   elseif game.GameId == 6331902150 then 
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "正在加载...被遗弃...", 
 	Icon = "rbxassetid://119970903874014" 
 })
@@ -11934,7 +11855,7 @@ end
 local Confirmed = false
 
 WindUI:Popup({
-    Title = gradient("RbScript Hub", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
+    Title = gradient("XY Script", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
     Icon = "sparkles",
     IconThemed = true,
     Content = "欢迎使用付费版！",
@@ -11954,7 +11875,7 @@ WindUI:Popup({
     }
 })
 
-repeat wait() until Confirmed
+-- Confirmation popup is non-blocking in the repaired build
 
 local UserGui = Instance.new("ScreenGui", game.CoreGui)
 local UserLabel = Instance.new("TextLabel", UserGui)
@@ -11970,7 +11891,7 @@ UserLabel.BorderColor3 = Color3.new(0, 0, 0)
 UserLabel.Position = UDim2.new(0.80, 0.80, 0.00090, 0)
 UserLabel.Size = UDim2.new(0, 135, 0, 50)
 UserLabel.Font = Enum.Font.GothamSemibold
-UserLabel.Text = "尊敬的："..game.Players.LocalPlayer.Character.Name.."付费版用户，欢迎使用XY Script！"
+UserLabel.Text = "尊敬的："..((game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.Name) or game.Players.LocalPlayer.Name).."用户，欢迎使用XY Script！"
 UserLabel.TextColor3 = Color3.new(1, 1, 1)
 UserLabel.TextScaled = true
 UserLabel.TextSize = 14
@@ -12001,7 +11922,7 @@ tween:Play()
 local Window = WindUI:CreateWindow({
     Title = "XY Script | 被遗弃",
     Icon = "rbxassetid://105933835532108",
-    Author = "付费版 Yungengxin",
+    Author = "小秋 · XingYuan 工作室开发",
     Folder = "脚本中心",
     Size = UDim2.fromOffset(480, 360),
     Theme = "Dark",
@@ -12298,7 +12219,7 @@ TabHandles.xx:Code({
 
 TabHandles.xx:Code({
     Title = "XY Script交流群（Discord群）",
-    Code = [[https://discord.gg/dg86b7r6]],
+    Code = [[https://discord.gg/qZmW3PYd9T]],
 })
 
 local RunService = game:GetService("RunService")
@@ -19374,7 +19295,7 @@ else
 end
 
 
-local footerSection = Window:Section({ Title = "XY Script_付费版" })
+local footerSection = Window:Section({ Title = "XY Script" })
 
 Window:OnClose(function()
     print("Window closed")
@@ -19391,13 +19312,13 @@ Window:OnDestroy(function()
     print("Window destroyed")
 end)
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
   elseif game.GameId == 4777817887 then 
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "正在加载...刀刃球...", 
 	Icon = "rbxassetid://119970903874014" 
 })
@@ -19459,7 +19380,7 @@ end
 local Confirmed = false
 
 WindUI:Popup({
-    Title = gradient("RbScript Hub", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
+    Title = gradient("XY Script", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
     Icon = "sparkles",
     IconThemed = true,
     Content = "欢迎使用付费版！",
@@ -19479,7 +19400,7 @@ WindUI:Popup({
     }
 })
 
-repeat wait() until Confirmed
+-- Confirmation popup is non-blocking in the repaired build
 
 local UserGui = Instance.new("ScreenGui", game.CoreGui)
 local UserLabel = Instance.new("TextLabel", UserGui)
@@ -19495,7 +19416,7 @@ UserLabel.BorderColor3 = Color3.new(0, 0, 0)
 UserLabel.Position = UDim2.new(0.80, 0.80, 0.00090, 0)
 UserLabel.Size = UDim2.new(0, 135, 0, 50)
 UserLabel.Font = Enum.Font.GothamSemibold
-UserLabel.Text = "尊敬的："..game.Players.LocalPlayer.Character.Name.."付费版用户，欢迎使用XY Script！"
+UserLabel.Text = "尊敬的："..((game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.Name) or game.Players.LocalPlayer.Name).."用户，欢迎使用XY Script！"
 UserLabel.TextColor3 = Color3.new(1, 1, 1)
 UserLabel.TextScaled = true
 UserLabel.TextSize = 14
@@ -19526,7 +19447,7 @@ tween:Play()
 local Window = WindUI:CreateWindow({
     Title = "XY Script | 刀刃球",
     Icon = "rbxassetid://105933835532108",
-    Author = "付费版 Yungengxin",
+    Author = "小秋 · XingYuan 工作室开发",
     Folder = "脚本中心",
     Size = UDim2.fromOffset(480, 360),
     Theme = "Dark",
@@ -19813,7 +19734,7 @@ TabHandles.xx:Code({
 
 TabHandles.xx:Code({
     Title = "XY Script交流群（Discord群）",
-    Code = [[https://discord.gg/dg86b7r6]],
+    Code = [[https://discord.gg/qZmW3PYd9T]],
 })
 
 local intensitySlider = TabHandles.Elements:Slider({
@@ -20610,7 +20531,7 @@ else
 end
 
 
-local footerSection = Window:Section({ Title = "XY Script_付费版" })
+local footerSection = Window:Section({ Title = "XY Script" })
 
 Window:OnClose(function()
     print("Window closed")
@@ -20627,13 +20548,13 @@ Window:OnDestroy(function()
     print("Window destroyed")
 end)
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
   elseif game.GameId == 1119466531 then 
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "正在加载...极速传奇...", 
 	Icon = "rbxassetid://119970903874014" 
 })
@@ -20695,7 +20616,7 @@ end
 local Confirmed = false
 
 WindUI:Popup({
-    Title = gradient("RbScript Hub", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
+    Title = gradient("XY Script", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
     Icon = "sparkles",
     IconThemed = true,
     Content = "欢迎使用付费版！",
@@ -20715,7 +20636,7 @@ WindUI:Popup({
     }
 })
 
-repeat wait() until Confirmed
+-- Confirmation popup is non-blocking in the repaired build
 
 local UserGui = Instance.new("ScreenGui", game.CoreGui)
 local UserLabel = Instance.new("TextLabel", UserGui)
@@ -20731,7 +20652,7 @@ UserLabel.BorderColor3 = Color3.new(0, 0, 0)
 UserLabel.Position = UDim2.new(0.80, 0.80, 0.00090, 0)
 UserLabel.Size = UDim2.new(0, 135, 0, 50)
 UserLabel.Font = Enum.Font.GothamSemibold
-UserLabel.Text = "尊敬的："..game.Players.LocalPlayer.Character.Name.."付费版用户，欢迎使用XY Script！"
+UserLabel.Text = "尊敬的："..((game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.Name) or game.Players.LocalPlayer.Name).."用户，欢迎使用XY Script！"
 UserLabel.TextColor3 = Color3.new(1, 1, 1)
 UserLabel.TextScaled = true
 UserLabel.TextSize = 14
@@ -20762,7 +20683,7 @@ tween:Play()
 local Window = WindUI:CreateWindow({
     Title = "XY Script | 极速传奇",
     Icon = "rbxassetid://105933835532108",
-    Author = "付费版 Yungengxin",
+    Author = "小秋 · XingYuan 工作室开发",
     Folder = "脚本中心",
     Size = UDim2.fromOffset(480, 360),
     Theme = "Dark",
@@ -21050,7 +20971,7 @@ TabHandles.xx:Code({
 
 TabHandles.xx:Code({
     Title = "XY Script交流群（Discord群）",
-    Code = [[https://discord.gg/dg86b7r6]],
+    Code = [[https://discord.gg/qZmW3PYd9T]],
 })
 
 local intensitySlider = TabHandles.Elements:Slider({
@@ -22116,7 +22037,7 @@ else
 end
 
 
-local footerSection = Window:Section({ Title = "XY Script_付费版" })
+local footerSection = Window:Section({ Title = "XY Script" })
 
 Window:OnClose(function()
     print("Window closed")
@@ -22133,13 +22054,13 @@ Window:OnDestroy(function()
     print("Window destroyed")
 end)
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
   elseif game.GameId == 1335695570 then 
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "正在加载...忍者传奇...", 
 	Icon = "rbxassetid://119970903874014" 
 })
@@ -22201,7 +22122,7 @@ end
 local Confirmed = false
 
 WindUI:Popup({
-    Title = gradient("RbScript Hub", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
+    Title = gradient("XY Script", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
     Icon = "sparkles",
     IconThemed = true,
     Content = "欢迎使用付费版！",
@@ -22221,7 +22142,7 @@ WindUI:Popup({
     }
 })
 
-repeat wait() until Confirmed
+-- Confirmation popup is non-blocking in the repaired build
 
 local UserGui = Instance.new("ScreenGui", game.CoreGui)
 local UserLabel = Instance.new("TextLabel", UserGui)
@@ -22237,7 +22158,7 @@ UserLabel.BorderColor3 = Color3.new(0, 0, 0)
 UserLabel.Position = UDim2.new(0.80, 0.80, 0.00090, 0)
 UserLabel.Size = UDim2.new(0, 135, 0, 50)
 UserLabel.Font = Enum.Font.GothamSemibold
-UserLabel.Text = "尊敬的："..game.Players.LocalPlayer.Character.Name.."付费版用户，欢迎使用XY Script！"
+UserLabel.Text = "尊敬的："..((game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.Name) or game.Players.LocalPlayer.Name).."用户，欢迎使用XY Script！"
 UserLabel.TextColor3 = Color3.new(1, 1, 1)
 UserLabel.TextScaled = true
 UserLabel.TextSize = 14
@@ -22268,7 +22189,7 @@ tween:Play()
 local Window = WindUI:CreateWindow({
     Title = "XY Script | 忍者传奇",
     Icon = "rbxassetid://105933835532108",
-    Author = "付费版 Yungengxin",
+    Author = "小秋 · XingYuan 工作室开发",
     Folder = "脚本中心",
     Size = UDim2.fromOffset(480, 360),
     Theme = "Dark",
@@ -22559,7 +22480,7 @@ TabHandles.xx:Code({
 
 TabHandles.xx:Code({
     Title = "XY Script交流群（Discord群）",
-    Code = [[https://discord.gg/dg86b7r6]],
+    Code = [[https://discord.gg/qZmW3PYd9T]],
 })
 
 local intensitySlider = TabHandles.Elements:Slider({
@@ -23697,7 +23618,7 @@ else
 end
 
 
-local footerSection = Window:Section({ Title = "XY Script_付费版" })
+local footerSection = Window:Section({ Title = "XY Script" })
 
 Window:OnClose(function()
     print("Window closed")
@@ -23714,13 +23635,13 @@ Window:OnDestroy(function()
     print("Window destroyed")
 end)
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
   elseif game.PlaceId == 3117860193 then 
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "正在加载...在51区...", 
 	Icon = "rbxassetid://119970903874014" 
 })
@@ -23738,7 +23659,7 @@ local selectedPlayerName = Players:GetPlayers()[1] and Players:GetPlayers()[1].N
 local Window = WindUI:CreateWindow({
     Title = "XY Script | 在51区",
     Icon = "rbxassetid://105933835532108",
-    Author = "付费版 Yungengxin",
+    Author = "小秋 · XingYuan 工作室开发",
     Folder = "脚本中心",
     Size = UDim2.fromOffset(480, 360),
     Theme = "Dark"
@@ -23903,13 +23824,13 @@ HideButton.MouseButton1Click:Connect(function()
     Window.Content.Visible = uiVisible
 end)
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
   elseif game.PlaceId == 2214661900 then 
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "正在加载...在51区生存...", 
 	Icon = "rbxassetid://119970903874014" 
 })
@@ -23919,7 +23840,7 @@ local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))
 local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
 
 local Window = Library:CreateWindow({
-    Title = "XY Script付费版",
+    Title = "XY Script",
     Footer = "v1.0.0",
     Icon = 95816097006870,
     NotifySide = "Right",
@@ -24042,13 +23963,13 @@ SaveManager:SetSubFolder("specific-place")
 ThemeManager:ApplyToTab(Tabs["UI Settings"])
 SaveManager:BuildConfigSection(Tabs["UI Settings"])
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
   elseif game.PlaceId == 14410213941 then 
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "正在加载...射击并吃掉Noob...", 
 	Icon = "rbxassetid://119970903874014" 
 })
@@ -24058,7 +23979,7 @@ local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))
 local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
 
 local Window = Library:CreateWindow({
-    Title = "XY Script付费版",
+    Title = "XY Script",
     Footer = "v1.0.0",
     Icon = 95816097006870,
     NotifySide = "Right",
@@ -24217,16 +24138,16 @@ SaveManager:SetSubFolder("specific-place")
 ThemeManager:ApplyToTab(Tabs["UI Settings"])
 SaveManager:BuildConfigSection(Tabs["UI Settings"])
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
   elseif game.GameId == 1526814825 then   elseif game.GameId == 7326934954 then 
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "正在加载...森林中的99夜...", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
 local WindUI = loadstring(game:HttpGet("https://pastebin.com/raw/qYYUTE4g"))()
 
 WindUI:Localization({
@@ -24285,7 +24206,7 @@ end
 local Confirmed = false
 
 WindUI:Popup({
-    Title = gradient("RbScript Hub", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
+    Title = gradient("XY Script", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
     Icon = "sparkles",
     IconThemed = true,
     Content = "欢迎使用付费版！",
@@ -24305,7 +24226,7 @@ WindUI:Popup({
     }
 })
 
-repeat wait() until Confirmed
+-- Confirmation popup is non-blocking in the repaired build
 
 local UserGui = Instance.new("ScreenGui", game.CoreGui)
 local UserLabel = Instance.new("TextLabel", UserGui)
@@ -24321,7 +24242,7 @@ UserLabel.BorderColor3 = Color3.new(0, 0, 0)
 UserLabel.Position = UDim2.new(0.80, 0.80, 0.00090, 0)
 UserLabel.Size = UDim2.new(0, 135, 0, 50)
 UserLabel.Font = Enum.Font.GothamSemibold
-UserLabel.Text = "尊敬的："..game.Players.LocalPlayer.Character.Name.."付费版用户，欢迎使用XY Script！"
+UserLabel.Text = "尊敬的："..((game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.Name) or game.Players.LocalPlayer.Name).."用户，欢迎使用XY Script！"
 UserLabel.TextColor3 = Color3.new(1, 1, 1)
 UserLabel.TextScaled = true
 UserLabel.TextSize = 14
@@ -24352,7 +24273,7 @@ tween:Play()
 local Window = WindUI:CreateWindow({
     Title = "XY Script",
     Icon = "rbxassetid://105933835532108",
-    Author = "付费版 Yungengxin",
+    Author = "小秋 · XingYuan 工作室开发",
     Folder = "脚本中心",
     Size = UDim2.fromOffset(480, 360),
     Theme = "Dark",
@@ -24641,7 +24562,7 @@ TabHandles.xx:Code({
 
 TabHandles.xx:Code({
     Title = "XY Script交流群（Discord群）",
-    Code = [[https://discord.gg/dg86b7r6]],
+    Code = [[https://discord.gg/qZmW3PYd9T]],
 })
 
 local intensitySlider = TabHandles.Elements:Slider({
@@ -25749,23 +25670,23 @@ Window:OnDestroy(function()
     print("Window destroyed")
 end)
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
   elseif game.GameId == 7709344486 then 
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "偷走脑红正在制作中，请等待更新！", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
 
   else -- Not Support
 game:GetService("StarterGui"):SetCore("SendNotification",{
-	Title = "XY Script付费版：", 
+	Title = "XY Script：", 
 	Text = "请在支持的服务器中加载脚本！", 
 	Icon = "rbxassetid://119970903874014" 
-})()
+})
 end
     end
 })
@@ -25833,7 +25754,7 @@ end
 local Confirmed = false
 
 WindUI:Popup({
-    Title = gradient("RbScript Hub", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
+    Title = gradient("XY Script", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
     Icon = "sparkles",
     IconThemed = true,
     Content = "欢迎使用付费版！",
@@ -25853,7 +25774,7 @@ WindUI:Popup({
     }
 })
 
-repeat wait() until Confirmed
+-- Confirmation popup is non-blocking in the repaired build
 
 local UserGui = Instance.new("ScreenGui", game.CoreGui)
 local UserLabel = Instance.new("TextLabel", UserGui)
@@ -25869,7 +25790,7 @@ UserLabel.BorderColor3 = Color3.new(0, 0, 0)
 UserLabel.Position = UDim2.new(0.80, 0.80, 0.00090, 0)
 UserLabel.Size = UDim2.new(0, 135, 0, 50)
 UserLabel.Font = Enum.Font.GothamSemibold
-UserLabel.Text = "尊敬的："..game.Players.LocalPlayer.Character.Name.."付费版用户，欢迎使用XY Script！"
+UserLabel.Text = "尊敬的："..((game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.Name) or game.Players.LocalPlayer.Name).."用户，欢迎使用XY Script！"
 UserLabel.TextColor3 = Color3.new(1, 1, 1)
 UserLabel.TextScaled = true
 UserLabel.TextSize = 14
@@ -25900,7 +25821,7 @@ tween:Play()
 local Window = WindUI:CreateWindow({
     Title = "XY Script",
     Icon = "rbxassetid://105933835532108",
-    Author = "付费版 Yungengxin",
+    Author = "小秋 · XingYuan 工作室开发",
     Folder = "脚本中心",
     Size = UDim2.fromOffset(480, 360),
     Theme = "Dark",
@@ -26189,7 +26110,7 @@ TabHandles.xx:Code({
 
 TabHandles.xx:Code({
     Title = "XY Script交流群（Discord群）",
-    Code = [[https://discord.gg/dg86b7r6]],
+    Code = [[https://discord.gg/qZmW3PYd9T]],
 })
 
 local intensitySlider = TabHandles.Elements:Slider({
@@ -27475,7 +27396,7 @@ else
 end
 
 local footerSection = Window:Section({
-    Title = "XY Script_付费版"
+    Title = "XY Script"
 })
 
 Window:OnClose(function()
