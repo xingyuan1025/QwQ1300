@@ -1,7 +1,8 @@
--- XingYuan Hub | 99 Nights in forest（修复版）
+-- XingYuan Hub | 99 Nights in Forest（汉化版）
+-- 仅用于 Roblox Studio 本地学习，请勿在在线服务器运行
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
--- Services（统一声明一次）
+-- Services
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
@@ -9,88 +10,90 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
+-- ========== 主题（美化配色） ==========
 WindUI:AddTheme({
     Name = "Dark",
-    Accent = "#18181b",
+    Accent = "#8b5cf6",
     Dialog = "#18181b",
-    Outline = "#FFFFFF",
-    Text = "#FFFFFF",
-    Placeholder = "#999999",
-    Background = "#0e0e10",
-    Button = "#52525b",
+    Outline = "#8b5cf6",
+    Text = "#f4f4f5",
+    Placeholder = "#71717a",
+    Background = "#09090b",
+    Button = "#27272a",
     Icon = "#a1a1aa",
 })
 
 WindUI:AddTheme({
     Name = "Light",
-    Accent = "#f4f4f5",
-    Dialog = "#f4f4f5",
-    Outline = "#000000",
-    Text = "#000000",
-    Placeholder = "#666666",
-    Background = "#ffffff",
+    Accent = "#6366f1",
+    Dialog = "#fafafa",
+    Outline = "#6366f1",
+    Text = "#18181b",
+    Placeholder = "#737373",
+    Background = "#e4e4e7",
     Button = "#e4e4e7",
     Icon = "#52525b",
 })
 
 WindUI:AddTheme({
     Name = "Gray",
-    Accent = "#374151",
-    Dialog = "#374151",
-    Outline = "#d1d5db",
-    Text = "#f9fafb",
-    Placeholder = "#9ca3af",
-    Background = "#1f2937",
-    Button = "#4b5563",
-    Icon = "#d1d5db",
+    Accent = "#64748b",
+    Dialog = "#1e293b",
+    Outline = "#94a3b8",
+    Text = "#f1f5f9",
+    Placeholder = "#94a3b8",
+    Background = "#0f172a",
+    Button = "#334155",
+    Icon = "#cbd5e1",
 })
 
 WindUI:AddTheme({
     Name = "Blue",
-    Accent = "#1e40af",
-    Dialog = "#1e3a8a",
-    Outline = "#93c5fd",
+    Accent = "#3b82f6",
+    Dialog = "#1e293b",
+    Outline = "#60a5fa",
     Text = "#f0f9ff",
-    Placeholder = "#60a5fa",
-    Background = "#1e293b",
-    Button = "#3b82f6",
+    Placeholder = "#64748b",
+    Background = "#0f172a",
+    Button = "#1e40af",
     Icon = "#93c5fd",
 })
 
 WindUI:AddTheme({
     Name = "Green",
-    Accent = "#059669",
-    Dialog = "#047857",
-    Outline = "#6ee7b7",
+    Accent = "#10b981",
+    Dialog = "#064e3b",
+    Outline = "#34d399",
     Text = "#ecfdf5",
-    Placeholder = "#34d399",
-    Background = "#064e3b",
-    Button = "#10b981",
-    Icon = "#6ee7b7",
+    Placeholder = "#6ee7b7",
+    Background = "#022c22",
+    Button = "#047857",
+    Icon = "#a7f3d0",
 })
 
 WindUI:AddTheme({
     Name = "Purple",
-    Accent = "#7c3aed",
-    Dialog = "#6d28d9",
-    Outline = "#c4b5fd",
+    Accent = "#a855f7",
+    Dialog = "#3b0764",
+    Outline = "#d8b4fe",
     Text = "#faf5ff",
-    Placeholder = "#a78bfa",
-    Background = "#581c87",
-    Button = "#8b5cf6",
-    Icon = "#c4b5fd",
+    Placeholder = "#c084fc",
+    Background = "#1e1033",
+    Button = "#7e22ce",
+    Icon = "#e9d5ff",
 })
 
 WindUI:SetNotificationLower(true)
 
 local themes = {"Dark", "Light", "Gray", "Blue", "Green", "Purple"}
+local themeCN = {"深色", "浅色", "灰色", "蓝色", "绿色", "紫色"}
 local currentThemeIndex = 1
 
 if not getgenv().TransparencyEnabled then
     getgenv().TransparencyEnabled = false
 end
 
--- combat
+-- ========== 战斗 ==========
 local killAuraToggle = false
 local chopAuraToggle = false
 local auraRadius = 50
@@ -104,7 +107,7 @@ local toolsDamageIDs = {
     ["Spear"] = "196_8999010016"
 }
 
--- auto food
+-- ========== 自动进食 ==========
 local autoFeedToggle = false
 local selectedFood = {}
 local hungerThreshold = 75
@@ -113,7 +116,7 @@ local alimentos = {
     "Apple", "Berry", "Carrot", "Cake", "Chili", "Cooked Morsel", "Cooked Steak"
 }
 
--- esp
+-- ========== ESP ==========
 local ie = {
     "Bandage", "Bolt", "Broken Fan", "Broken Microwave", "Cake", "Carrot", "Chair", "Coal", "Coin Stack",
     "Cooked Morsel", "Cooked Steak", "Fuel Canister", "Iron Body", "Leather Armor", "Log", "MadKit", "Metal Chair",
@@ -122,7 +125,7 @@ local ie = {
 }
 local me = {"Bunny", "Wolf", "Alpha Wolf", "Bear", "Cultist", "Crossbow Cultist", "Alien"}
 
--- bring
+-- ========== 拾取 ==========
 local junkItems = {"Tyre", "Bolt", "Broken Fan", "Broken Microwave", "Sheet Metal", "Old Radio", "Washing Machine", "Old Car Engine"}
 local selectedJunkItems = {}
 local fuelItems = {"Log", "Chair", "Coal", "Fuel Canister", "Oil Barrel"}
@@ -150,7 +153,6 @@ local foodLoopRunning = false
 local medicalLoopRunning = false
 local equipmentLoopRunning = false
 
--- 平滑移动（task 化）
 local function smoothPullToItem(startPos, endPos, duration)
     local hrp = LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart
     if not hrp then return end
@@ -183,7 +185,6 @@ local function smoothPullToItem(startPos, endPos, duration)
     task.wait(duration)
 end
 
--- 物品吸附效果
 local function createItemPullEffect(itemPart, targetPos, duration)
     if not itemPart or not itemPart.Parent then return end
 
@@ -222,7 +223,6 @@ local function createItemPullEffect(itemPart, targetPos, duration)
     task.wait(duration)
 end
 
--- 搬运系统
 local function bypassBringSystem(items, stopFlag)
     if isCollecting then return end
 
@@ -308,19 +308,17 @@ local function bypassBringSystem(items, stopFlag)
     isCollecting = false
 end
 
--- auto upgrade campfire
+-- ========== 营火 / 分解 / 烹饪 ==========
 local campfireFuelItems = {"Log", "Coal", "Chair", "Fuel Canister", "Oil Barrel", "Biofuel"}
 local campfireDropPos = Vector3.new(0, 19, 0)
 local selectedCampfireItem = nil
 local autoUpgradeCampfireEnabled = false
 
--- auto scrap
 local scrapjunkItems = {"Log", "Chair", "Tyre", "Bolt", "Broken Fan", "Broken Microwave", "Sheet Metal", "Old Radio", "Washing Machine", "Old Car Engine"}
 local autoScrapPos = Vector3.new(21, 20, -5)
 local selectedScrapItem = nil
 local autoScrapItemsEnabled = false
 
--- auto cook
 local autocookItems = {"Morsel", "Steak", "Elvis Steak"}
 local autoCookEnabledItems = {}
 local autoCookEnabled = false
@@ -358,7 +356,7 @@ local function killAuraLoop()
             local tool, damageID = getAnyToolWithDamageID(false)
             if tool and damageID then
                 equipTool(tool)
-                local chars = Workspace:FindFirstChild("Characters")  -- 判空修复
+                local chars = Workspace:FindFirstChild("Characters")
                 if chars then
                     for _, mob in ipairs(chars:GetChildren()) do
                         if mob:IsA("Model") then
@@ -441,7 +439,7 @@ end
 
 function wiki(nome)
     local c = 0
-    local container = Workspace:FindFirstChild("Items")  -- 判空修复
+    local container = Workspace:FindFirstChild("Items")
     if not container then return 0 end
     for _, i in ipairs(container:GetChildren()) do
         if i.Name == nome then
@@ -456,7 +454,7 @@ function ghn()
 end
 
 function feed(nome)
-    local container = Workspace:FindFirstChild("Items")  -- 判空修复
+    local container = Workspace:FindFirstChild("Items")
     if not container then return end
     for _, item in ipairs(container:GetChildren()) do
         if item.Name == nome then
@@ -468,8 +466,8 @@ end
 
 function notifeed(nome)
     WindUI:Notify({
-        Title = "Auto Food Paused",
-        Content = "The food is gone",
+        Title = "自动进食已暂停",
+        Content = "所选食物已耗尽",
         Duration = 3
     })
 end
@@ -502,7 +500,7 @@ local function getChests()
     for _, item in ipairs(container:GetChildren()) do
         if item.Name:match("^Item Chest") and not item:GetAttribute("8721081708ed") then
             table.insert(chests, item)
-            table.insert(chestNames, "Chest " .. index)
+            table.insert(chestNames, "宝箱 " .. index)
             index = index + 1
         end
     end
@@ -556,17 +554,15 @@ local function tp2()
     end
 end
 
--- Fly
+-- ========== 飞行 ==========
 local flyToggle = false
 local flySpeed = 1
 local FLYING = false
 local flyKeyDown, flyKeyUp, mfly1, mfly2
 
--- Fly pc
 local function sFLY()
     repeat task.wait() until LocalPlayer.Character and LocalPlayer.Character:WaitForChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
 
-    -- 逐个断开，防止 nil 崩溃（修复）
     if flyKeyDown then flyKeyDown:Disconnect(); flyKeyDown = nil end
     if flyKeyUp then flyKeyUp:Disconnect(); flyKeyUp = nil end
 
@@ -589,7 +585,6 @@ local function sFLY()
         task.spawn(function()
             while FLYING do
                 task.wait()
-                -- 修复：飞行时应该 PlatformStand = true
                 if flyToggle then
                     local char = LocalPlayer.Character
                     local hum = char and char:FindFirstChildOfClass('Humanoid')
@@ -660,14 +655,13 @@ local function sFLY()
     FLY()
 end
 
--- Fly mobile
 local function NOFLY()
     FLYING = false
     if flyKeyDown then flyKeyDown:Disconnect(); flyKeyDown = nil end
     if flyKeyUp then flyKeyUp:Disconnect(); flyKeyUp = nil end
     if mfly1 then mfly1:Disconnect(); mfly1 = nil end
     if mfly2 then mfly2:Disconnect(); mfly2 = nil end
-    local char = LocalPlayer.Character  -- 判空修复
+    local char = LocalPlayer.Character
     local hum = char and char:FindFirstChildOfClass('Humanoid')
     if hum then hum.PlatformStand = false end
     pcall(function() workspace.CurrentCamera.CameraType = Enum.CameraType.Custom end)
@@ -692,7 +686,7 @@ local function MobileFly()
     UnMobileFly()
     FLYING = true
 
-    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()  -- 判空修复
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
     local root = char:WaitForChild("HumanoidRootPart")
     local camera = workspace.CurrentCamera
     local v3none = Vector3.new()
@@ -764,7 +758,6 @@ local function MobileFly()
     end)
 end
 
--- Player TP to Items Bring System（保留备用，已去掉重复声明）
 local function bringItemsByPlayerTP(itemNames, originalPosition)
     if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         return
@@ -811,12 +804,13 @@ local function bringItemsByPlayerTP(itemNames, originalPosition)
     hrp.CFrame = CFrame.new(originalPosition)
 end
 
+-- ========== 创建窗口 ==========
 local Window = WindUI:CreateWindow({
-    Title = "99 Nights in forest | XingYuan Hub",
+    Title = "99 Nights in Forest | XingYuan Hub",
     Icon = "zap",
     Author = "XingYuan Scripts",
     Folder = "XingYuan Hub",
-    Size = UDim2.fromOffset(500, 350),
+    Size = UDim2.fromOffset(520, 360),
     Transparent = getgenv().TransparencyEnabled,
     Theme = "Dark",
     Resizable = true,
@@ -837,12 +831,11 @@ local Window = WindUI:CreateWindow({
             WindUI:SetTheme(newTheme)
 
             WindUI:Notify({
-                Title = "Theme Changed",
-                Content = "Switched to " .. newTheme .. " theme!",
+                Title = "主题已切换",
+                Content = "已切换到「" .. themeCN[currentThemeIndex] .. "」主题！",
                 Duration = 2,
                 Icon = "palette"
             })
-            print("Switched to " .. newTheme .. " theme")
         end,
     },
 })
@@ -856,55 +849,54 @@ pcall(function()
             pcall(function() Window:ToggleTransparency(false) end)
 
             WindUI:Notify({
-                Title = "Transparency",
-                Content = "Transparency disabled",
+                Title = "透明度",
+                Content = "透明度已关闭",
                 Duration = 3,
                 Icon = "eye"
             })
-            print("Transparency = false")
         else
             getgenv().TransparencyEnabled = true
             pcall(function() Window:ToggleTransparency(true) end)
 
             WindUI:Notify({
-                Title = "Transparency",
-                Content = "Transparency enabled",
+                Title = "透明度",
+                Content = "透明度已开启",
                 Duration = 3,
                 Icon = "eye-off"
             })
-            print(" Transparency = true")
         end
-        print("Debug - Current Transparency state:", getgenv().TransparencyEnabled)
     end, 990)
 end)
 
+-- 美化：打开按钮渐变（紫 → 青）
 Window:EditOpenButton({
-    Title = "Toggle",
+    Title = "菜单",
     Icon = "zap",
-    CornerRadius = UDim.new(0, 6),
+    CornerRadius = UDim.new(0, 10),
     StrokeThickness = 2,
-    Color = ColorSequence.new(Color3.fromRGB(138, 43, 226), Color3.fromRGB(173, 216, 230)),
+    Color = ColorSequence.new(Color3.fromRGB(139, 92, 246), Color3.fromRGB(34, 211, 238)),
     Draggable = true,
 })
 
 local Tabs = {}
 
-Tabs.Combat = Window:Tab({ Title = "Combat", Icon = "sword", Desc = "XingYuan" })
-Tabs.Main = Window:Tab({ Title = "Main", Icon = "align-left", Desc = "XingYuan" })
-Tabs.Auto = Window:Tab({ Title = "Auto", Icon = "wrench", Desc = "XingYuan" })
-Tabs.esp = Window:Tab({ Title = "Esp", Icon = "sparkles", Desc = "XingYuan" })
-Tabs.br = Window:Tab({ Title = "Bring", Icon = "package", Desc = "XingYuan" })
-Tabs.Tp = Window:Tab({ Title = "Teleport", Icon = "map", Desc = "XingYuan" })
-Tabs.Fly = Window:Tab({ Title = "Player", Icon = "user", Desc = "XingYuan" })
-Tabs.Vision = Window:Tab({ Title = "Environment", Icon = "eye", Desc = "XingYuan" })
-Tabs.Info = Window:Tab({ Title = "Information", Icon = "badge-info", Desc = "XingYuan" })
+Tabs.Combat = Window:Tab({ Title = "战斗", Icon = "sword", Desc = "XingYuan" })
+Tabs.Main = Window:Tab({ Title = "主页", Icon = "align-left", Desc = "XingYuan" })
+Tabs.Auto = Window:Tab({ Title = "自动", Icon = "wrench", Desc = "XingYuan" })
+Tabs.esp = Window:Tab({ Title = "透视", Icon = "sparkles", Desc = "XingYuan" })
+Tabs.br = Window:Tab({ Title = "拾取", Icon = "package", Desc = "XingYuan" })
+Tabs.Tp = Window:Tab({ Title = "传送", Icon = "map", Desc = "XingYuan" })
+Tabs.Fly = Window:Tab({ Title = "玩家", Icon = "user", Desc = "XingYuan" })
+Tabs.Vision = Window:Tab({ Title = "环境", Icon = "eye", Desc = "XingYuan" })
+Tabs.Info = Window:Tab({ Title = "关于", Icon = "badge-info", Desc = "XingYuan" })
 
 Window:SelectTab(9)
 
-Tabs.Combat:Section({ Title = "Aura", Icon = "star" })
+-- ========== 战斗页 ==========
+Tabs.Combat:Section({ Title = "自动攻击", Icon = "star" })
 
 Tabs.Combat:Toggle({
-    Title = "Kill Aura",
+    Title = "杀戮光环",
     Value = false,
     Callback = function(state)
         killAuraToggle = state
@@ -918,7 +910,7 @@ Tabs.Combat:Toggle({
 })
 
 Tabs.Combat:Toggle({
-    Title = "Chop Aura",
+    Title = "伐木光环",
     Value = false,
     Callback = function(state)
         chopAuraToggle = state
@@ -931,21 +923,22 @@ Tabs.Combat:Toggle({
     end
 })
 
-Tabs.Combat:Section({ Title = "Settings", Icon = "settings" })
+Tabs.Combat:Section({ Title = "功能设置", Icon = "settings" })
 
 Tabs.Combat:Slider({
-    Title = "Aura Radius",
+    Title = "光环范围",
     Value = { Min = 50, Max = 500, Default = 50 },
     Callback = function(value)
         auraRadius = math.clamp(value, 10, 500)
     end
 })
 
-Tabs.Main:Section({ Title = "Auto Feed", Icon = "utensils" })
+-- ========== 主页 ==========
+Tabs.Main:Section({ Title = "自动进食", Icon = "utensils" })
 
 Tabs.Main:Dropdown({
-    Title = "Select Food",
-    Desc = "Choose the food",
+    Title = "选择食物",
+    Desc = "勾选需要的食物",
     Values = alimentos,
     Value = selectedFood,
     Multi = true,
@@ -955,10 +948,10 @@ Tabs.Main:Dropdown({
 })
 
 Tabs.Main:Input({
-    Title = "Feed %",
-    Desc = "Eat when hunger reaches this %",
+    Title = "进食阈值 (%)",
+    Desc = "饱食度低于此值时自动进食",
     Value = tostring(hungerThreshold),
-    Placeholder = "Ex: 75",
+    Placeholder = "例如：75",
     Numeric = true,
     Callback = function(value)
         local n = tonumber(value)
@@ -969,7 +962,7 @@ Tabs.Main:Input({
 })
 
 Tabs.Main:Toggle({
-    Title = "Auto Feed",
+    Title = "开启自动进食",
     Value = false,
     Callback = function(state)
         autoFeedToggle = state
@@ -977,14 +970,13 @@ Tabs.Main:Toggle({
             task.spawn(function()
                 while autoFeedToggle do
                     task.wait(0.075)
-                    -- 修复：selectedFood 是 table，遍历统计
                     local total = 0
                     for _, name in ipairs(selectedFood) do
                         total = total + wiki(name)
                     end
                     if total == 0 then
                         autoFeedToggle = false
-                        local tf = Tabs.Main:Find("Auto Feed")  -- 修复：Tabs.Main
+                        local tf = Tabs.Main:Find("开启自动进食")
                         if tf then tf:SetValue(false) end
                         notifeed()
                         break
@@ -1003,11 +995,80 @@ Tabs.Main:Toggle({
     end
 })
 
-Tabs.Auto:Section({ Title = "Auto Upgrade Campfire", Icon = "flame" })
+Tabs.Main:Section({ Title = "其他功能", Icon = "settings" })
+
+local instantInteractEnabled = false
+local instantInteractConnection
+local originalHoldDurations = {}
+
+Tabs.Main:Toggle({
+    Title = "瞬间互动",
+    Value = false,
+    Callback = function(state)
+        instantInteractEnabled = state
+
+        if state then
+            originalHoldDurations = {}
+            instantInteractConnection = task.spawn(function()
+                while instantInteractEnabled do
+                    for _, obj in ipairs(workspace:GetDescendants()) do
+                        if obj:IsA("ProximityPrompt") then
+                            if originalHoldDurations[obj] == nil then
+                                originalHoldDurations[obj] = obj.HoldDuration
+                            end
+                            obj.HoldDuration = 0
+                        end
+                    end
+                    task.wait(0.5)
+                end
+            end)
+        else
+            instantInteractEnabled = false
+            instantInteractConnection = nil
+            for obj, value in pairs(originalHoldDurations) do
+                if obj and obj:IsA("ProximityPrompt") then
+                    obj.HoldDuration = value
+                end
+            end
+            originalHoldDurations = {}
+        end
+    end
+})
+
+local torchEnabled = false
+local torchLoop = nil
+
+Tabs.Main:Toggle({
+    Title = "自动击晕鹿",
+    Value = false,
+    Callback = function(state)
+        torchEnabled = state
+        if state and not torchLoop then
+            torchLoop = task.spawn(function()
+                while torchEnabled do
+                    pcall(function()
+                        local remote = ReplicatedStorage:FindFirstChild("RemoteEvents")
+                            and ReplicatedStorage.RemoteEvents:FindFirstChild("DeerHitByTorch")
+                        local chars = workspace:FindFirstChild("Characters")
+                        local deer = chars and chars:FindFirstChild("Deer")
+                        if remote and deer then
+                            remote:InvokeServer(deer)
+                        end
+                    end)
+                    task.wait(0.1)
+                end
+                torchLoop = nil
+            end)
+        end
+    end
+})
+
+-- ========== 自动页 ==========
+Tabs.Auto:Section({ Title = "自动升级营火", Icon = "flame" })
 
 Tabs.Auto:Dropdown({
-    Title = "Auto Upgrade Campfire",
-    Desc = "Choose the items",
+    Title = "选择燃料",
+    Desc = "选择要添加的燃料",
     Values = campfireFuelItems,
     Multi = false,
     AllowNone = true,
@@ -1017,7 +1078,7 @@ Tabs.Auto:Dropdown({
 })
 
 Tabs.Auto:Toggle({
-    Title = "Auto Upgrade Campfire",
+    Title = "开启自动升级营火",
     Value = false,
     Callback = function(checked)
         autoUpgradeCampfireEnabled = checked
@@ -1038,11 +1099,11 @@ Tabs.Auto:Toggle({
     end
 })
 
-Tabs.Auto:Section({ Title = "Auto Scrap Items", Icon = "cog" })
+Tabs.Auto:Section({ Title = "自动分解物品", Icon = "cog" })
 
 Tabs.Auto:Dropdown({
-    Title = "Auto Scrap Items",
-    Desc = "Choose the items",
+    Title = "选择分解物",
+    Desc = "选择要分解的物品",
     Values = scrapjunkItems,
     Multi = false,
     AllowNone = true,
@@ -1052,7 +1113,7 @@ Tabs.Auto:Dropdown({
 })
 
 Tabs.Auto:Toggle({
-    Title = "Auto Scrap Item",
+    Title = "开启自动分解",
     Value = false,
     Callback = function(checked)
         autoScrapItemsEnabled = checked
@@ -1073,10 +1134,10 @@ Tabs.Auto:Toggle({
     end
 })
 
-Tabs.Auto:Section({ Title = "Auto Cook Food", Icon = "flame" })
+Tabs.Auto:Section({ Title = "自动烹饪食物", Icon = "flame" })
 
 Tabs.Auto:Dropdown({
-    Title = "Auto Cook Food",
+    Title = "选择食材",
     Values = autocookItems,
     Multi = true,
     AllowNone = true,
@@ -1088,7 +1149,7 @@ Tabs.Auto:Dropdown({
 })
 
 Tabs.Auto:Toggle({
-    Title = "Auto Cook Food",
+    Title = "开启自动烹饪",
     Value = false,
     Callback = function(state)
         autoCookEnabled = state
@@ -1112,10 +1173,11 @@ task.spawn(function()
     end
 end)
 
-Tabs.Tp:Section({ Title = "Teleport", Icon = "map" })
+-- ========== 传送页 ==========
+Tabs.Tp:Section({ Title = "快速传送", Icon = "map" })
 
 Tabs.Tp:Button({
-    Title = "Teleport to Campfire",
+    Title = "传送至营地",
     Locked = false,
     Callback = function()
         tp1()
@@ -1123,29 +1185,28 @@ Tabs.Tp:Button({
 })
 
 Tabs.Tp:Button({
-    Title = "Teleport to Stronghold",
+    Title = "传送至要塞",
     Locked = false,
     Callback = function()
         tp2()
     end
 })
 
-Tabs.Tp:Section({ Title = "Children", Icon = "eye" })
+Tabs.Tp:Section({ Title = "走失儿童", Icon = "eye" })
 
 local MobDropdown = Tabs.Tp:Dropdown({
-    Title = "Select Child",
+    Title = "选择儿童",
     Values = currentMobNames,
     Multi = false,
     AllowNone = true,
     Callback = function(options)
-        -- 修复：单选时 callback 收到的是字符串，不是 table
         local v = type(options) == "table" and options[#options] or options
         selectedMob = v or currentMobNames[1] or nil
     end
 })
 
 Tabs.Tp:Button({
-    Title = "Refresh List",
+    Title = "刷新列表",
     Locked = false,
     Callback = function()
         currentMobs, currentMobNames = getMobs()
@@ -1154,13 +1215,13 @@ Tabs.Tp:Button({
             MobDropdown:Refresh(currentMobNames)
         else
             selectedMob = nil
-            MobDropdown:Refresh({ "No child found" })
+            MobDropdown:Refresh({ "未找到儿童" })
         end
     end
 })
 
 Tabs.Tp:Button({
-    Title = "Teleport to Child",
+    Title = "传送到儿童位置",
     Locked = false,
     Callback = function()
         if selectedMob and currentMobs then
@@ -1182,22 +1243,21 @@ Tabs.Tp:Button({
     end
 })
 
-Tabs.Tp:Section({ Title = "Chest", Icon = "box" })
+Tabs.Tp:Section({ Title = "宝箱", Icon = "box" })
 
 local ChestDropdown = Tabs.Tp:Dropdown({
-    Title = "Select Chest",
+    Title = "选择宝箱",
     Values = currentChestNames,
     Multi = false,
     AllowNone = true,
     Callback = function(options)
-        -- 修复：同上
         local v = type(options) == "table" and options[#options] or options
         selectedChest = v or currentChestNames[1] or nil
     end
 })
 
 Tabs.Tp:Button({
-    Title = "Refresh List",
+    Title = "刷新列表",
     Locked = false,
     Callback = function()
         currentChests, currentChestNames = getChests()
@@ -1206,13 +1266,13 @@ Tabs.Tp:Button({
             ChestDropdown:Refresh(currentChestNames)
         else
             selectedChest = nil
-            ChestDropdown:Refresh({ "No chests found" })
+            ChestDropdown:Refresh({ "未找到宝箱" })
         end
     end
 })
 
 Tabs.Tp:Button({
-    Title = "Teleport to Chest",
+    Title = "传送到宝箱位置",
     Locked = false,
     Callback = function()
         if selectedChest and currentChests then
@@ -1236,11 +1296,12 @@ Tabs.Tp:Button({
     end
 })
 
-Tabs.br:Section({ Title = "Junk", Icon = "box" })
+-- ========== 拾取页 ==========
+Tabs.br:Section({ Title = "杂物", Icon = "box" })
 
 Tabs.br:Dropdown({
-    Title = "Select Junk Items",
-    Desc = "Choose items to bring",
+    Title = "选择杂物",
+    Desc = "勾选要拾取的物品",
     Values = junkItems,
     Multi = true,
     AllowNone = true,
@@ -1250,8 +1311,8 @@ Tabs.br:Dropdown({
 })
 
 Tabs.br:Toggle({
-    Title = "Bring Junk Items",
-    Desc = "Before you Bring Unlocked 1 zone first!",
+    Title = "开启拾取杂物",
+    Desc = "提示：请先解锁1号区域",
     Default = false,
     Callback = function(value)
         junkToggleEnabled = value
@@ -1282,11 +1343,11 @@ Tabs.br:Toggle({
     end
 })
 
-Tabs.br:Section({ Title = "Fuel", Icon = "flame" })
+Tabs.br:Section({ Title = "燃料", Icon = "flame" })
 
 Tabs.br:Dropdown({
-    Title = "Select Fuel Items",
-    Desc = "Choose items to bring",
+    Title = "选择燃料",
+    Desc = "勾选要拾取的物品",
     Values = fuelItems,
     Multi = true,
     AllowNone = true,
@@ -1296,8 +1357,8 @@ Tabs.br:Dropdown({
 })
 
 Tabs.br:Toggle({
-    Title = "Bring Fuel Items",
-    Desc = "Before you Bring Unlocked 1 Zone First!",
+    Title = "开启拾取燃料",
+    Desc = "提示：请先解锁1号区域",
     Default = false,
     Callback = function(value)
         fuelToggleEnabled = value
@@ -1328,11 +1389,11 @@ Tabs.br:Toggle({
     end
 })
 
-Tabs.br:Section({ Title = "Food", Icon = "utensils" })
+Tabs.br:Section({ Title = "食物", Icon = "utensils" })
 
 Tabs.br:Dropdown({
-    Title = "Select Food Items",
-    Desc = "Choose items to bring",
+    Title = "选择食物",
+    Desc = "勾选要拾取的物品",
     Values = foodItems,
     Multi = true,
     AllowNone = true,
@@ -1342,8 +1403,8 @@ Tabs.br:Dropdown({
 })
 
 Tabs.br:Toggle({
-    Title = "Bring Food items",
-    Desc = "Before you Bring Unlocked 1 Zone First!",
+    Title = "开启拾取食物",
+    Desc = "提示：请先解锁1号区域",
     Default = false,
     Callback = function(value)
         foodToggleEnabled = value
@@ -1374,11 +1435,11 @@ Tabs.br:Toggle({
     end
 })
 
-Tabs.br:Section({ Title = "Medicine", Icon = "bandage" })
+Tabs.br:Section({ Title = "医疗用品", Icon = "bandage" })
 
 Tabs.br:Dropdown({
-    Title = "Select Medical Items",
-    Desc = "Choose items to bring",
+    Title = "选择医疗品",
+    Desc = "勾选要拾取的物品",
     Values = medicalItems,
     Multi = true,
     AllowNone = true,
@@ -1388,8 +1449,8 @@ Tabs.br:Dropdown({
 })
 
 Tabs.br:Toggle({
-    Title = "Bring Medical Items",
-    Desc = "Before you Bring Unlocked 1 Zone First!",
+    Title = "开启拾取医疗品",
+    Desc = "提示：请先解锁1号区域",
     Default = false,
     Callback = function(value)
         medicalToggleEnabled = value
@@ -1420,11 +1481,11 @@ Tabs.br:Toggle({
     end
 })
 
-Tabs.br:Section({ Title = "Equipment", Icon = "sword" })
+Tabs.br:Section({ Title = "装备", Icon = "sword" })
 
 Tabs.br:Dropdown({
-    Title = "Select Equipment Items",
-    Desc = "Choose items to bring",
+    Title = "选择装备",
+    Desc = "勾选要拾取的物品",
     Values = equipmentItems,
     Multi = true,
     AllowNone = true,
@@ -1434,8 +1495,8 @@ Tabs.br:Dropdown({
 })
 
 Tabs.br:Toggle({
-    Title = "Bring Equipment Items",
-    Desc = "Before you Bring Unlocked 1 Zone First!",
+    Title = "开启拾取装备",
+    Desc = "提示：请先解锁1号区域",
     Default = false,
     Callback = function(value)
         equipmentToggleEnabled = value
@@ -1466,11 +1527,11 @@ Tabs.br:Toggle({
     end
 })
 
-Tabs.Fly:Section({ Title = "Main", Icon = "eye" })
+-- ========== 玩家页 ==========
+Tabs.Fly:Section({ Title = "基础设置", Icon = "eye" })
 
--- 修复：滑杆只更新数值，不再泄漏线程
 Tabs.Fly:Slider({
-    Title = "Fly Speed",
+    Title = "飞行速度",
     Value = { Min = 1, Max = 20, Default = 1 },
     Callback = function(value)
         flySpeed = value
@@ -1478,7 +1539,7 @@ Tabs.Fly:Slider({
 })
 
 Tabs.Fly:Toggle({
-    Title = "Enable Fly",
+    Title = "开启飞行",
     Value = false,
     Callback = function(state)
         flyToggle = state
@@ -1495,7 +1556,6 @@ Tabs.Fly:Toggle({
     end
 })
 
--- 修复：速度持久化
 local walkSpeed = 16
 local speedToggleEnabled = false
 
@@ -1506,7 +1566,7 @@ local function setSpeed(val)
 end
 
 Tabs.Fly:Slider({
-    Title = "Speed",
+    Title = "行走速度",
     Value = { Min = 16, Max = 150, Default = 16 },
     Callback = function(value)
         walkSpeed = value
@@ -1515,7 +1575,7 @@ Tabs.Fly:Slider({
 })
 
 Tabs.Fly:Toggle({
-    Title = "Enable Speed",
+    Title = "开启加速",
     Value = false,
     Callback = function(state)
         speedToggleEnabled = state
@@ -1523,7 +1583,6 @@ Tabs.Fly:Toggle({
     end
 })
 
--- 重生后自动恢复速度
 LocalPlayer.CharacterAdded:Connect(function()
     task.wait(0.5)
     if speedToggleEnabled then setSpeed(walkSpeed) end
@@ -1532,7 +1591,7 @@ end)
 local noclipConnection
 
 Tabs.Fly:Toggle({
-    Title = "Noclip",
+    Title = "穿墙模式",
     Value = false,
     Callback = function(state)
         local char = LocalPlayer.Character
@@ -1552,7 +1611,6 @@ Tabs.Fly:Toggle({
                 noclipConnection:Disconnect()
                 noclipConnection = nil
             end
-            -- 修复：关闭时恢复碰撞
             if char then
                 for _, part in ipairs(char:GetDescendants()) do
                     if part:IsA("BasePart") then
@@ -1567,7 +1625,7 @@ Tabs.Fly:Toggle({
 local infJumpConnection
 
 Tabs.Fly:Toggle({
-    Title = "Inf Jump",
+    Title = "无限跳跃",
     Value = false,
     Callback = function(state)
         if state then
@@ -1587,6 +1645,7 @@ Tabs.Fly:Toggle({
     end
 })
 
+-- ========== ESP ==========
 function createESPText(part, text, color)
     if part:FindFirstChild("ESPTexto") then return end
 
@@ -1666,10 +1725,10 @@ local espItemsEnabled = false
 local espMobsEnabled = false
 local espConnections = {}
 
-Tabs.esp:Section({ Title = "Esp Items", Icon = "package" })
+Tabs.esp:Section({ Title = "物品透视", Icon = "package" })
 
 Tabs.esp:Dropdown({
-    Title = "Esp Items",
+    Title = "选择物品",
     Values = ie,
     Value = {},
     Multi = true,
@@ -1693,7 +1752,7 @@ Tabs.esp:Dropdown({
 })
 
 Tabs.esp:Toggle({
-    Title = "Enable Esp",
+    Title = "开启物品透视",
     Value = false,
     Callback = function(state)
         espItemsEnabled = state
@@ -1713,7 +1772,7 @@ Tabs.esp:Toggle({
                         if table.find(selectedItems, obj.Name) then
                             local part = obj:IsA("BasePart") and obj or obj:FindFirstChildWhichIsA("BasePart")
                             if part then
-                                createESPText(part, obj.Name, Color3.fromRGB(0, 255, 0))  -- 修复：函数名
+                                createESPText(part, obj.Name, Color3.fromRGB(0, 255, 0))
                             end
                         end
                     end)
@@ -1728,10 +1787,10 @@ Tabs.esp:Toggle({
     end
 })
 
-Tabs.esp:Section({ Title = "Esp Entity", Icon = "user" })
+Tabs.esp:Section({ Title = "生物透视", Icon = "user" })
 
 Tabs.esp:Dropdown({
-    Title = "Esp Entity",
+    Title = "选择生物",
     Values = me,
     Value = {},
     Multi = true,
@@ -1755,7 +1814,7 @@ Tabs.esp:Dropdown({
 })
 
 Tabs.esp:Toggle({
-    Title = "Enable Esp",
+    Title = "开启生物透视",
     Value = false,
     Callback = function(state)
         espMobsEnabled = state
@@ -1775,7 +1834,7 @@ Tabs.esp:Toggle({
                         if table.find(selectedMobs, obj.Name) then
                             local part = obj:IsA("BasePart") and obj or obj:FindFirstChildWhichIsA("BasePart")
                             if part then
-                                createESPText(part, obj.Name, Color3.fromRGB(255, 255, 0))  -- 修复：函数名
+                                createESPText(part, obj.Name, Color3.fromRGB(255, 255, 0))
                             end
                         end
                     end)
@@ -1790,76 +1849,8 @@ Tabs.esp:Toggle({
     end
 })
 
-Tabs.Main:Section({ Title = "Misc", Icon = "settings" })
-
-local instantInteractEnabled = false
-local instantInteractConnection
-local originalHoldDurations = {}
-
-Tabs.Main:Toggle({
-    Title = "Instant Interact",
-    Value = false,
-    Callback = function(state)
-        instantInteractEnabled = state
-
-        if state then
-            originalHoldDurations = {}
-            instantInteractConnection = task.spawn(function()
-                while instantInteractEnabled do
-                    for _, obj in ipairs(workspace:GetDescendants()) do
-                        if obj:IsA("ProximityPrompt") then
-                            if originalHoldDurations[obj] == nil then
-                                originalHoldDurations[obj] = obj.HoldDuration
-                            end
-                            obj.HoldDuration = 0
-                        end
-                    end
-                    task.wait(0.5)
-                end
-            end)
-        else
-            instantInteractEnabled = false
-            instantInteractConnection = nil
-            for obj, value in pairs(originalHoldDurations) do
-                if obj and obj:IsA("ProximityPrompt") then
-                    obj.HoldDuration = value
-                end
-            end
-            originalHoldDurations = {}
-        end
-    end
-})
-
--- 修复：Auto Stun Deer 改成标志位循环
-local torchEnabled = false
-local torchLoop = nil
-
-Tabs.Main:Toggle({
-    Title = "Auto Stun Deer",
-    Value = false,
-    Callback = function(state)
-        torchEnabled = state
-        if state and not torchLoop then
-            torchLoop = task.spawn(function()
-                while torchEnabled do
-                    pcall(function()
-                        local remote = ReplicatedStorage:FindFirstChild("RemoteEvents")
-                            and ReplicatedStorage.RemoteEvents:FindFirstChild("DeerHitByTorch")
-                        local chars = workspace:FindFirstChild("Characters")
-                        local deer = chars and chars:FindFirstChild("Deer")
-                        if remote and deer then
-                            remote:InvokeServer(deer)
-                        end
-                    end)
-                    task.wait(0.1)
-                end
-                torchLoop = nil
-            end)
-        end
-    end
-})
-
-Tabs.Vision:Section({ Title = "Vision", Icon = "eye" })
+-- ========== 环境页 ==========
+Tabs.Vision:Section({ Title = "视觉效果", Icon = "eye" })
 
 local originalParents = {
     Sky = nil,
@@ -1901,7 +1892,7 @@ end
 storeColorCorrectionParent()
 
 Tabs.Vision:Toggle({
-    Title = "Disable Fog",
+    Title = "关闭雾气",
     Desc = "",
     Value = false,
     Callback = function(state)
@@ -1956,7 +1947,7 @@ end
 storeOriginalLighting()
 
 Tabs.Vision:Toggle({
-    Title = "Disable NightCampFire Effect",
+    Title = "关闭夜间营火光效",
     Desc = "",
     Value = false,
     Callback = function(state)
@@ -1986,7 +1977,7 @@ Tabs.Vision:Toggle({
 })
 
 Tabs.Vision:Toggle({
-    Title = "Fullbright",
+    Title = "全屏亮度",
     Desc = "",
     Value = false,
     Callback = function(state)
@@ -2010,6 +2001,7 @@ Tabs.Vision:Toggle({
     end
 })
 
+-- ========== 关于页 ==========
 Info = Tabs["Info"]
 
 if not ui then ui = {} end
@@ -2048,7 +2040,6 @@ ui.Creator.Request = function(requestData)
 end
 
 local InviteCode = "dg86b7r6"
--- 修复：discord.gg 不支持 API 参数，必须用 discord.com/api/v10/invites/
 local DiscordAPI = "https://discord.com/api/v10/invites/" .. InviteCode .. "?with_counts=true"
 
 local function LoadDiscordInfo()
@@ -2066,14 +2057,14 @@ local function LoadDiscordInfo()
     if success and result and result.guild then
         local DiscordInfo = Info:Paragraph({
             Title = result.guild.name,
-            Desc = ' <font color="#52525b">●</font> Member Count : ' .. tostring(result.approximate_member_count) ..
-                '\n <font color="#16a34a">●</font> Online Count : ' .. tostring(result.approximate_presence_count),
+            Desc = ' <font color="#71717a">●</font> 成员数量 : ' .. tostring(result.approximate_member_count) ..
+                '\n <font color="#22c55e">●</font> 在线数量 : ' .. tostring(result.approximate_presence_count),
             Image = "https://cdn.discordapp.com/icons/" .. result.guild.id .. "/" .. result.guild.icon .. ".png?size=1024",
             ImageSize = 42,
         })
 
         Info:Button({
-            Title = "Update Info",
+            Title = "刷新信息",
             Callback = function()
                 local updated, updatedResult = pcall(function()
                     return game:GetService("HttpService"):JSONDecode(ui.Creator.Request({
@@ -2084,20 +2075,20 @@ local function LoadDiscordInfo()
 
                 if updated and updatedResult and updatedResult.guild then
                     DiscordInfo:SetDesc(
-                        ' <font color="#52525b">●</font> Member Count : ' .. tostring(updatedResult.approximate_member_count) ..
-                        '\n <font color="#16a34a">●</font> Online Count : ' .. tostring(updatedResult.approximate_presence_count)
+                        ' <font color="#71717a">●</font> 成员数量 : ' .. tostring(updatedResult.approximate_member_count) ..
+                        '\n <font color="#22c55e">●</font> 在线数量 : ' .. tostring(updatedResult.approximate_presence_count)
                     )
 
                     WindUI:Notify({
-                        Title = "Discord Info Updated",
-                        Content = "Successfully refreshed Discord statistics",
+                        Title = "Discord 信息已更新",
+                        Content = "Discord 数据刷新成功",
                         Duration = 2,
                         Icon = "refresh-cw",
                     })
                 else
                     WindUI:Notify({
-                        Title = "Update Failed",
-                        Content = "Could not refresh Discord info",
+                        Title = "更新失败",
+                        Content = "无法刷新 Discord 信息",
                         Duration = 3,
                         Icon = "alert-triangle",
                     })
@@ -2106,12 +2097,12 @@ local function LoadDiscordInfo()
         })
 
         Info:Button({
-            Title = "Copy Discord Invite",
+            Title = "复制邀请链接",
             Callback = function()
-                setclipboard("https://discord.gg/dg86b7r6")  -- 修复：补全引号
+                setclipboard("https://discord.gg/dg86b7r6")
                 WindUI:Notify({
-                    Title = "Copied!",
-                    Content = "Discord invite copied to clipboard",
+                    Title = "已复制！",
+                    Content = "Discord 邀请链接已复制到剪贴板",
                     Duration = 2,
                     Icon = "clipboard-check",
                 })
@@ -2119,8 +2110,8 @@ local function LoadDiscordInfo()
         })
     else
         Info:Paragraph({
-            Title = "Error fetching Discord Info",
-            Desc = "Unable to load Discord information. Check your internet connection.",
+            Title = "Discord 信息加载失败",
+            Desc = "无法加载 Discord 信息，请检查网络连接",
             Image = "triangle-alert",
             ImageSize = 26,
             Color = "Red",
@@ -2140,7 +2131,7 @@ Info:Section({
 Info:Divider()
 
 local Owner = Info:Paragraph({
-    Title = "Main Founder",
+    Title = "主要作者",
     Desc = "XingYuan",
     Image = "rbxassetid://109219709724036",
     ImageSize = 30,
@@ -2161,7 +2152,7 @@ local CoOwner = Info:Paragraph({
 
 local Discord = Info:Paragraph({
     Title = "Discord",
-    Desc = "Join our discord for more scripts!",
+    Desc = "加入 Discord 获取更多脚本！",
     Image = "rbxassetid://109219709724036",
     ImageSize = 30,
     Thumbnail = "",
@@ -2170,7 +2161,7 @@ local Discord = Info:Paragraph({
     Buttons = {
         {
             Icon = "copy",
-            Title = "Copy Link",
+            Title = "复制链接",
             Callback = function()
                 setclipboard("https://discord.gg/dg86b7r6")
                 print("Copied discord link to clipboard!")
