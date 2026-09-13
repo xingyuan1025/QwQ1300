@@ -1,4 +1,3 @@
-
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 
@@ -860,9 +859,9 @@ local function bringItemsByPlayerTP(itemNames, originalPosition)
 end
 
 local Window = WindUI:CreateWindow({
-    Title = "99 Nights in forest | Chasesdd Hub",
+    Title = "99 Nights in forest | XingYuan Hub",
     Icon = "zap",
-    Author = "Chasesdd Scripts",
+    Author = "XingYuan Scripts",
     Folder = "Chasesdd Hub",
     Size = UDim2.fromOffset(500, 350),
     Transparent = getgenv().TransparencyEnabled,
