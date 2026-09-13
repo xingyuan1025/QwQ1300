@@ -209,7 +209,7 @@ Title.Name = "Title"
 
 Title.Parent = Header
 
-Title.Text = "玩家传送器Kenny鸡巴大☪️"
+Title.Text = "玩家传送器XingYuan"
 
 Title.TextColor3 = textColor
 
