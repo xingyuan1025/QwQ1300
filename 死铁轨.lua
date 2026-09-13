@@ -1,7 +1,6 @@
----不加密了我的b站UID:1531514159汉化看我视频有教程
 local Translations = {
-    ["RINGTA SCRIPTS"] = "RINGTA 脚本",
-    ["ringta"] = "Kenny汉化b站UID:1531514159",
+    ["RINGTA SCRIPTS"] = "XingYuan 脚本",
+    ["ringta"] = "XY汉化b站UID:",
     ["Tp To Fort"] = "传送到堡垒",
     ["Tp To Firework Gun"] = "传送到烟花枪",
     ["Tp To Firework Gun Ammo"] = "传送到烟花枪弹药",
