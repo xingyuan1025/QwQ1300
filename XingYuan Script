@@ -1,6 +1,11 @@
 -- XY Script | 小秋 | XingYuan 工作室开发 | repaired build
+local function XY_Notify(data)
+    pcall(function()
+        game:GetService("StarterGui"):SetCore("SendNotification", data)
+    end)
+end
 if game.GameId == 7709344486 then  --- Doors Lobby
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", -- Required
 	Text = "正在加载...偷走脑红...", -- Required
 	Icon = "rbxassetid://119970903874014" -- Optional
@@ -224,7 +229,7 @@ end
 local function checkFloor3()
     local _, floorName = getCurrentFloor()
     if floorName == "floor3" then
-        StarterGui:SetCore("SendNotification", {
+        XY_Notify({
             Title = "Jack 827",
             Text = "不支持三楼",
             Duration = 10
@@ -428,13 +433,13 @@ ProximityPromptService.PromptTriggered:Connect(function(prompt, plr)
         end
     end)
 end)
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
 elseif game.GameId == 2440500124 then  --- Doors Lobby
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", -- Required
 	Text = "正在加载...Doors...", -- Required
 	Icon = "rbxassetid://119970903874014" -- Optional
@@ -2981,13 +2986,13 @@ end)
 Window:OnDestroy(function()
     print("Window destroyed")
 end)
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
 elseif game.GameId == 2820580801 then  --- Doors Lobby
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", -- Required
 	Text = "正在加载...俄亥俄州...", -- Required
 	Icon = "rbxassetid://119970903874014" -- Optional
@@ -3851,13 +3856,13 @@ local function StopAnim()
     end
 end
 
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
 elseif game.GameId == 7008097940 then 
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "正在加载...墨水游戏...", 
 	Icon = "rbxassetid://119970903874014" 
@@ -4867,7 +4872,7 @@ WindUI:Notify({
     Icon = "zap",
     Duration = 5
 })
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
@@ -6033,7 +6038,7 @@ TabHandles.gn:Button({
     Icon = "bell",
     Callback = function()
 if game.GameId == 3808081382 then  --- Doors Lobby
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", -- Required
 	Text = "正在加载...最强战场...", -- Required
 	Icon = "rbxassetid://119970903874014" -- Optional
@@ -8261,13 +8266,13 @@ end)
 Window:OnDestroy(function()
     print("Window destroyed")
 end)
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
   elseif game.GameId == 7009714292 then 
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "正在加载...启示录...", 
 	Icon = "rbxassetid://119970903874014" 
@@ -9602,13 +9607,13 @@ end)
 Window:OnDestroy(function()
     print("Window destroyed")
 end)
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
   elseif game.GameId == 7008097940 then 
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "正在加载...墨水游戏...", 
 	Icon = "rbxassetid://119970903874014" 
@@ -10618,13 +10623,13 @@ WindUI:Notify({
     Icon = "zap",
     Duration = 5
 })
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
   elseif game.GameId == 7436755782 then 
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "正在加载...种植花园...", 
 	Icon = "rbxassetid://119970903874014" 
@@ -11786,13 +11791,13 @@ end)
 Window:OnDestroy(function()
     print("Window destroyed")
 end)
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
   elseif game.GameId == 6331902150 then 
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "正在加载...被遗弃...", 
 	Icon = "rbxassetid://119970903874014" 
@@ -19311,13 +19316,13 @@ end)
 Window:OnDestroy(function()
     print("Window destroyed")
 end)
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
   elseif game.GameId == 4777817887 then 
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "正在加载...刀刃球...", 
 	Icon = "rbxassetid://119970903874014" 
@@ -20547,13 +20552,13 @@ end)
 Window:OnDestroy(function()
     print("Window destroyed")
 end)
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
   elseif game.GameId == 1119466531 then 
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "正在加载...极速传奇...", 
 	Icon = "rbxassetid://119970903874014" 
@@ -22053,13 +22058,13 @@ end)
 Window:OnDestroy(function()
     print("Window destroyed")
 end)
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
   elseif game.GameId == 1335695570 then 
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "正在加载...忍者传奇...", 
 	Icon = "rbxassetid://119970903874014" 
@@ -23634,13 +23639,13 @@ end)
 Window:OnDestroy(function()
     print("Window destroyed")
 end)
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
   elseif game.PlaceId == 3117860193 then 
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "正在加载...在51区...", 
 	Icon = "rbxassetid://119970903874014" 
@@ -23823,13 +23828,13 @@ HideButton.MouseButton1Click:Connect(function()
     uiVisible = not uiVisible
     Window.Content.Visible = uiVisible
 end)
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
   elseif game.PlaceId == 2214661900 then 
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "正在加载...在51区生存...", 
 	Icon = "rbxassetid://119970903874014" 
@@ -23962,13 +23967,13 @@ SaveManager:SetFolder("MyScriptHub/specific-game")
 SaveManager:SetSubFolder("specific-place")
 ThemeManager:ApplyToTab(Tabs["UI Settings"])
 SaveManager:BuildConfigSection(Tabs["UI Settings"])
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
   elseif game.PlaceId == 14410213941 then 
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "正在加载...射击并吃掉Noob...", 
 	Icon = "rbxassetid://119970903874014" 
@@ -24137,13 +24142,13 @@ SaveManager:SetFolder("MyScriptHub/specific-game")
 SaveManager:SetSubFolder("specific-place")
 ThemeManager:ApplyToTab(Tabs["UI Settings"])
 SaveManager:BuildConfigSection(Tabs["UI Settings"])
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
   elseif game.GameId == 1526814825 then   elseif game.GameId == 7326934954 then 
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "正在加载...森林中的99夜...", 
 	Icon = "rbxassetid://119970903874014" 
@@ -25669,20 +25674,20 @@ end)
 Window:OnDestroy(function()
     print("Window destroyed")
 end)
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "成功", 
 	Icon = "rbxassetid://119970903874014" 
 })
   elseif game.GameId == 7709344486 then 
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "偷走脑红正在制作中，请等待更新！", 
 	Icon = "rbxassetid://119970903874014" 
 })
 
   else -- Not Support
-game:GetService("StarterGui"):SetCore("SendNotification",{
+XY_Notify({
 	Title = "XY Script：", 
 	Text = "请在支持的服务器中加载脚本！", 
 	Icon = "rbxassetid://119970903874014" 
@@ -27413,4 +27418,10 @@ end)
 Window:OnDestroy(function()
     print("Window destroyed")
 end)
+else
+    XY_Notify({
+        Title = "XY Script",
+        Text = "当前游戏暂不支持",
+        Duration = 6
+    })
 end
