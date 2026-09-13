@@ -47,7 +47,7 @@ onof.BackgroundColor3 = Color3.fromRGB(255, 255, 255)  -- 背景颜色改为白�
 onof.Position = UDim2.new(0.702823281, 0, 0.491228074, 0)  -- 位置
 onof.Size = UDim2.new(0, 56, 0, 28)  -- 大小
 onof.Font = Enum.Font.SourceSans  -- 字体
-onof.Text = "飞行"  -- 文本
+onof.Text = "小秋飞行"  -- 文本
 onof.TextColor3 = Color3.fromRGB(0, 0, 0)  -- 文本颜色
 onof.TextSize = 14.000  -- 文本大小
 
