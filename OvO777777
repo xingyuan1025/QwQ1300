@@ -2182,8 +2182,8 @@ end
 -- Remove this line completely: Info = InfoTab
 -- The Info variable is already correctly set above
 
-local InviteCode = "dg86b7r6"
-local DiscordAPI = "https://discord.gg/dg86b7r6" .. InviteCode .. "?with_counts=true&with_expiration=true"
+local InviteCode = "38M6yaJRek"
+local DiscordAPI = "https://discord.com/api/v10/invites/" .. InviteCode .. "?with_counts=true&with_expiration=true"
 
 local function LoadDiscordInfo()
     local success, result = pcall(function()
@@ -2242,7 +2242,7 @@ local function LoadDiscordInfo()
         Info:Button({
             Title = "Copy Discord Invite",
             Callback = function()
-                setclipboard("https://discord.gg/dg86b7r6)
+                setclipboard("https://discord.gg/" .. InviteCode)
                 WindUI:Notify({
                     Title = "Copied!",
                     Content = "Discord invite copied to clipboard",
@@ -2306,7 +2306,7 @@ local Discord = Info:Paragraph({
             Icon = "copy",
             Title = "Copy Link",
             Callback = function()
-                setclipboard("https://discord.gg/dg86b7r6")
+                setclipboard("https://discord.gg/PAy8Ht3SDC")
                 print("Copied discord link to clipboard!")
             end,
         }
