@@ -1,25 +1,37 @@
 local CoreGui = game:GetService("StarterGui") 
 
-CoreGui:SetCore("SendNotification", { 
-     Title = "提示", 
-     Text = "工作室：XingYuan", 
-     Duration = 10,  
- })
+pcall(function()
+    CoreGui:SetCore("SendNotification", {
+        Title = "提示", Text = "工作室 XingYuan", Duration = 10,
+    })
+end)
 
-CoreGui:SetCore("SendNotification", { 
-     Title = "提示", 
-     Text = "即将加载，请稍候...", 
-     Duration = 20,  
- })
+pcall(function()
+    CoreGui:SetCore("SendNotification", {
+        Title = "提示", Text = "即将加载，请稍候...", Duration = 20,
+    })
+end)
 
 local gs = function(service)
     return game:GetService(service)
 end
 
 local lp = gs("Players").LocalPlayer
-local pos = lp.Character.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
-local ME = game.Players.LocalPlayer.Character.HumanoidRootPart
-local Mouse = game:GetService('Players').LocalPlayer:GetMouse()
+local function getCharacter(timeout)
+    timeout = timeout or 10
+    local character = lp.Character or lp.CharacterAdded:Wait()
+    local root = character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart", timeout)
+    local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid", timeout)
+    if not root or not humanoid then return nil, nil, nil end
+    return character, root, humanoid
+end
+local initialCharacter, initialRoot = getCharacter(15)
+if not initialCharacter or not initialRoot then
+    warn("[XY] 角色尚未加载完成，部分功能可能不可用。")
+end
+local pos = initialRoot and (initialRoot.CFrame + Vector3.new(0, 5, 0)) or CFrame.new()
+local ME = initialRoot
+local Mouse = gs("Players").LocalPlayer:GetMouse()
 local CurrentSlot = game.Players.LocalPlayer:WaitForChild("CurrentSaveSlot").Value
 local ScriptLoadOrSave = false
 local CurrentlySavingOrLoading = game.Players.LocalPlayer:WaitForChild("CurrentlySavingOrLoading")
@@ -90,7 +102,7 @@ local bai = {
     wood = 7,
     cswjia = nil,
     boxOpenConnection = nil,
-    autobuystop = flase,
+    autobuystop = false,
     dropdown = {},
     autocsdx = nil,
     kuangxiu = nil,
@@ -110,7 +122,7 @@ spawn(function()
             Color3.fromRGB(255, 0, 0)
         wait(1)
         game:GetService("Workspace").Stores.WoodRUs.Parts.PREMIUMSELECTION.SurfaceGui.TextLabel.Text =
-            XY
+            "XY"
         game:GetService("Workspace").Stores.WoodRUs.Parts.PREMIUMSELECTION.SurfaceGui.TextLabel.TextColor3 =
             Color3.fromRGB(255, 0, 0)
         wait(1)
@@ -136,19 +148,32 @@ game:GetService("Workspace").Stores.WoodRUs.Parts.WOODDROPOFF.SurfaceGui.TextLab
 local Player = game.Players.LocalPlayer
 
 local function droptool(Position)
-    local aQ = game.Players.LocalPlayer.Character;
-    if aQ:FindFirstChildOfClass "Tool" then
-        local y = aQ:FindFirstChildOfClass "Tool"
-        if y:FindFirstChild("ToolName") then
-            game.ReplicatedStorage.Interaction.ClientInteracted:FireServer(b, "Drop tool", Position or
-                game.Players.LocalPlayer.Character.Head.CFrame)
+    local player = game:GetService("Players").LocalPlayer
+    local character = player.Character
+    local backpack = player:FindFirstChildOfClass("Backpack")
+    local interaction = game:GetService("ReplicatedStorage"):FindFirstChild("Interaction")
+    local remote = interaction and interaction:FindFirstChild("ClientInteracted")
+    local head = character and character:FindFirstChild("Head")
+    local dropCFrame = Position or (head and head.CFrame)
 
+    -- Character, Backpack, or the remote may not be ready yet.
+    if not remote or not dropCFrame then
+        return
+    end
+
+    local function dropTool(tool)
+        if tool and tool:IsA("Tool") and tool:FindFirstChild("ToolName") then
+            remote:FireServer(tool, "Drop tool", dropCFrame)
         end
     end
-    for a, b in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-        if b.Name == "Tool" and b.ClassName == "Tool" then
-            game.ReplicatedStorage.Interaction.ClientInteracted:FireServer(b, "Drop tool", Position or
-                game.Players.LocalPlayer.Character.Head.CFrame)
+
+    if character then
+        dropTool(character:FindFirstChildOfClass("Tool"))
+    end
+
+    if backpack then
+        for _, tool in ipairs(backpack:GetChildren()) do
+            dropTool(tool)
         end
     end
 end
@@ -375,24 +400,8 @@ function TurnVisible()
         lp.Character.Animate.Disabled = true
         lp.Character.Animate.Disabled = false
 end
-for i, v in next, game:GetService("Players").LocalPlayer.PlayerGui:GetChildren() do
-    if v.Name ~= "Chat" and v.Name ~= "TargetGui" then
-        for i, v in next, v:GetDescendants() do
-            local UC = Instance.new("UICorner", v)
-            UC.CornerRadius = UDim.new(0, 5)
-            if v.Name == "DropShadow" then
-                v:Destroy()
-            end
-            if v:IsA("TextButton") or v:IsA("Frame") or v:IsA("ScrollingFrame") then
-                v.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
-            end
-            if v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("TextBox") then
-                v.TextColor3 = Color3.fromRGB(225, 225, 225)
-                v.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
-            end
-        end
-    end
-end
+-- 不再批量改写 PlayerGui 中所有现有界面，避免破坏游戏原生 UI。
+
 notify = function(...)
     local GUI = game:GetService("CoreGui"):FindFirstChild("STX_Nofitication")
     if not GUI then
@@ -729,13 +738,23 @@ local function getCFrame(part)
     return part.CFrame
 end
 
-local function tp(pos)
-    local pos = pos or lp:GetMouse().Hit + Vector3.new(0, lp.Character.HumanoidRootPart.Size.Y, 0)
-    if typeof(pos) == "CFrame" then
-        lp.Character:SetPrimaryPartCFrame(pos)
-    elseif typeof(pos) == "Vector3" then
-        lp.Character:MoveTo(pos)
+local function tp(destination)
+    local character, root = getCharacter(5)
+    if not character or not root then
+        warn("[XY] 传送失败：角色或 HumanoidRootPart 尚未加载。")
+        return false
     end
+    destination = destination or (lp:GetMouse().Hit + Vector3.new(0, root.Size.Y, 0))
+    if typeof(destination) == "CFrame" then
+        if not character.PrimaryPart then character.PrimaryPart = root end
+        character:PivotTo(destination)
+        return true
+    elseif typeof(destination) == "Vector3" then
+        character:MoveTo(destination)
+        return true
+    end
+    warn("[XY] 传送失败：目标必须是 CFrame 或 Vector3。")
+    return false
 end
 
 require = getgenv().require -- for pebc and sentinel
@@ -1803,35 +1822,52 @@ function shuaxinlb(zji)
 end
 shuaxinlb(true)
 
+-- 在加载 UI 库前记录现有 ScreenGui，后续用于识别本脚本创建的主界面。
+local __xyGuiBaseline = {}
+for _, container in ipairs({game:GetService("CoreGui"), lp:WaitForChild("PlayerGui")}) do
+    for _, child in ipairs(container:GetChildren()) do
+        if child:IsA("ScreenGui") then __xyGuiBaseline[child] = true end
+    end
+end
+
 local library = loadstring(game:HttpGet("https://github.com/CloudX-ScriptsWane/baijiaobengv4beta/raw/main/silent%20ui.txt", true))()
-local window = library:new("XY--伐木大亨2", '')
-local Tab1 = window:Tab("玩家功能", "10882439086")
-local Section3 = Tab1:section("玩家", false)
-local Section4 = Tab1:section("普通传送", false)
-local Sectiontptree = Tab1:section("传送到树旁边", false)
-local Section6 = Tab1:section("汽车传送", false)
-local Tab = window:Tab("主要功能", "10728953248")
-local Section = Tab:section("斧头", false)
-local Section1 = Tab:section("基地", false)
-local Section5 = Tab:section("木头", false)
-local Sectionbringtree = Tab:section("带来树", false)
-local Sectionjinbi = Tab:section("快速转钱", false)
-local Sectionqiche = Tab:section("汽车", false)
-local Sectionchuanson = Tab:section("传送物品", false)
-local Sectionfengche = Tab:section("刷粉车", false)
-local Sectionqita = Tab:section("其他功能", false)
-local Sectionshuoh = Tab:section("语言", false)
-local Sectionyule = Tab:section("娱乐区域", false)
-local Sectionzhenglimt = Tab:section("整理木板", false)
-local Sectionzhengli = Tab:section("整理", false)
-local Sectiontchon = Tab:section("填充蓝图（用木头）", false)
-local Tab2 = window:Tab("环境", "4626047596")
-local Sectionhuanjin = Tab2:section("环境", false)
-local Tab4 = window:Tab("魔鬼功能", "8036839063")
-local Sectionmogui = Tab4:section("魔鬼功能(慎用)", false)
+local window = library:new("XY · 伐木大亨工具箱", "")
+-- 重新分组：保持原有 Section 变量名，尽量不影响后续功能回调。
+local Tab1 = window:Tab("玩家与传送", "10882439086")
+local Section3 = Tab1:section("角色属性", false)
+local Section4 = Tab1:section("位置传送", false)
+local Sectiontptree = Tab1:section("树木定位", false)
+local Section6 = Tab1:section("车辆传送", false)
+
+local Tab = window:Tab("伐木与基地", "10728953248")
+local Section = Tab:section("斧头工具", false)
+local Section1 = Tab:section("基地管理", false)
+local Section5 = Tab:section("砍树与木材", false)
+local Sectionbringtree = Tab:section("树木操作", false)
+local Sectionjinbi = Tab:section("资金相关", false)
+local Sectionqita = Tab:section("其他工具", false)
+local Sectionshuoh = Tab:section("语言与显示", false)
+
+local TabItems = window:Tab("物品与蓝图", "4626047596")
+local Sectionchuanson = TabItems:section("物品传送与选择", false)
+local Sectionzhenglimt = TabItems:section("木板整理", false)
+local Sectionzhengli = TabItems:section("物品整理", false)
+local Sectiontchon = TabItems:section("蓝图填充", false)
+local Sectionfengche = TabItems:section("车辆工具", false)
+
+local Tab2 = window:Tab("环境设置", "4626047596")
+local Sectionhuanjin = Tab2:section("地图与环境", false)
+local Sectionyule = Tab2:section("娱乐功能", false)
+
+local TabVehicle = window:Tab("车辆控制", "558024189")
+local Sectionqiche = TabVehicle:section("车辆移动与控制", false)
+
 local Tab5 = window:Tab("自动购买", "558024189")
-local Sectionautobuy = Tab5:section("自动购买V2(测试)", false)
-local Sectionautobuy6 = Tab5:section("其他", false)
+local Sectionautobuy = Tab5:section("自动购买（测试）", false)
+local Sectionautobuy6 = Tab5:section("快捷购买", false)
+
+local TabAdvanced = window:Tab("高级 / 实验", "8036839063")
+local Sectionmogui = TabAdvanced:section("高风险功能 · 使用前确认", false)
 
 Section:Toggle("自动扔斧头", 'Toggleflag', false, function(state)
     bai.autodropae = true
@@ -5290,4 +5326,289 @@ Sectionautobuy6:Button("买鲨鱼", function()
             end
         end)
     end);
+end)
+
+
+-- XY 移动端磨砂玻璃控制条：搜索、隐藏/显示、拖动与操作状态提示。
+-- 独立于原 UI 库，避免更换控件实现导致既有功能回调失效。
+task.spawn(function()
+    local Players = game:GetService("Players")
+    local UserInputService = game:GetService("UserInputService")
+    local TweenService = game:GetService("TweenService")
+    local player = Players.LocalPlayer
+    local playerGui = player:WaitForChild("PlayerGui")
+    local coreGui = game:GetService("CoreGui")
+    local mainGuis = {}
+    for gui in pairs(__xyGuiBaseline) do
+        if gui and gui.Parent then mainGuis[#mainGuis + 1] = gui end
+    end
+    for _, container in ipairs({coreGui, playerGui}) do
+        for _, child in ipairs(container:GetChildren()) do
+            if child:IsA("ScreenGui") and not __xyGuiBaseline[child] and child.Name ~= "XY_FrostedControl" then
+                mainGuis[#mainGuis + 1] = child
+            end
+        end
+    end
+
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "XY_FrostedControl"
+    gui.ResetOnSpawn = false
+    gui.IgnoreGuiInset = true
+    gui.DisplayOrder = 9999
+    pcall(function() gui.Parent = coreGui end)
+    if not gui.Parent then gui.Parent = playerGui end
+
+    local panel = Instance.new("Frame")
+    panel.Name = "Panel"
+    panel.Size = UDim2.new(0, 300, 0, 56)
+    panel.Position = UDim2.new(0.5, -150, 0.12, 0)
+    panel.BackgroundColor3 = Color3.fromRGB(35, 27, 54)
+    panel.BackgroundTransparency = 0.16
+    panel.BorderSizePixel = 0
+    panel.Active = true
+    panel.Parent = gui
+    Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 15)
+    local stroke = Instance.new("UIStroke", panel)
+    stroke.Color = Color3.fromRGB(176, 123, 255)
+    stroke.Transparency = 0.25
+    stroke.Thickness = 1.2
+    local gradient = Instance.new("UIGradient", panel)
+    gradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(61, 43, 88)), ColorSequenceKeypoint.new(1, Color3.fromRGB(28, 24, 43))})
+    gradient.Rotation = 15
+
+    local title = Instance.new("TextLabel")
+    title.BackgroundTransparency = 1
+    title.Position = UDim2.new(0, 12, 0, 4)
+    title.Size = UDim2.new(0, 118, 0, 20)
+    title.Font = Enum.Font.GothamBold
+    title.Text = "XY  ·  伐木大亨"
+    title.TextColor3 = Color3.fromRGB(244, 236, 255)
+    title.TextSize = 13
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = panel
+
+    local status = Instance.new("TextLabel")
+    status.BackgroundTransparency = 1
+    status.Position = UDim2.new(0, 12, 0, 27)
+    status.Size = UDim2.new(0, 170, 0, 18)
+    status.Font = Enum.Font.Gotham
+    status.Text = "状态：界面已就绪"
+    status.TextColor3 = Color3.fromRGB(203, 190, 224)
+    status.TextSize = 10
+    status.TextXAlignment = Enum.TextXAlignment.Left
+    status.TextTruncate = Enum.TextTruncate.AtEnd
+    status.Parent = panel
+
+    local function makeButton(text, x, width)
+        local b = Instance.new("TextButton")
+        b.Size = UDim2.new(0, width, 0, 30)
+        b.Position = UDim2.new(0, x, 0, 13)
+        b.BackgroundColor3 = Color3.fromRGB(111, 73, 164)
+        b.BackgroundTransparency = 0.12
+        b.BorderSizePixel = 0
+        b.Font = Enum.Font.GothamSemibold
+        b.Text = text
+        b.TextColor3 = Color3.fromRGB(255, 255, 255)
+        b.TextSize = 11
+        b.AutoButtonColor = true
+        b.Parent = panel
+        Instance.new("UICorner", b).CornerRadius = UDim.new(0, 9)
+        return b
+    end
+    local searchButton = makeButton("搜索", 188, 48)
+    local hideButton = makeButton("隐藏", 240, 48)
+
+    local searchPanel = Instance.new("Frame")
+    searchPanel.Name = "SearchPanel"
+    searchPanel.Position = UDim2.new(0, 0, 0, 62)
+    searchPanel.Size = UDim2.new(1, 0, 0, 190)
+    searchPanel.BackgroundColor3 = Color3.fromRGB(35, 27, 54)
+    searchPanel.BackgroundTransparency = 0.12
+    searchPanel.BorderSizePixel = 0
+    searchPanel.Visible = false
+    searchPanel.Parent = panel
+    Instance.new("UICorner", searchPanel).CornerRadius = UDim.new(0, 13)
+    local searchStroke = Instance.new("UIStroke", searchPanel)
+    searchStroke.Color = Color3.fromRGB(176, 123, 255)
+    searchStroke.Transparency = 0.4
+
+    local searchBox = Instance.new("TextBox")
+    searchBox.PlaceholderText = "输入功能名称，例如：传送、车辆、自动购买"
+    searchBox.Text = ""
+    searchBox.ClearTextOnFocus = false
+    searchBox.Position = UDim2.new(0, 9, 0, 9)
+    searchBox.Size = UDim2.new(1, -18, 0, 34)
+    searchBox.BackgroundColor3 = Color3.fromRGB(52, 42, 71)
+    searchBox.BorderSizePixel = 0
+    searchBox.Font = Enum.Font.Gotham
+    searchBox.TextSize = 12
+    searchBox.TextColor3 = Color3.fromRGB(250, 246, 255)
+    searchBox.PlaceholderColor3 = Color3.fromRGB(181, 167, 202)
+    searchBox.Parent = searchPanel
+    Instance.new("UICorner", searchBox).CornerRadius = UDim.new(0, 8)
+
+    local results = Instance.new("ScrollingFrame")
+    results.Position = UDim2.new(0, 9, 0, 51)
+    results.Size = UDim2.new(1, -18, 1, -60)
+    results.BackgroundTransparency = 1
+    results.BorderSizePixel = 0
+    results.ScrollBarThickness = 3
+    results.CanvasSize = UDim2.new(0, 0, 0, 0)
+    results.Parent = searchPanel
+    local resultLayout = Instance.new("UIListLayout", results)
+    resultLayout.Padding = UDim.new(0, 4)
+    resultLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    local function collectTextControls()
+        local found, seen = {}, {}
+        for _, root in ipairs(mainGuis) do
+            if root and root.Parent then
+                for _, obj in ipairs(root:GetDescendants()) do
+                    if (obj:IsA("TextButton") or obj:IsA("TextLabel") or obj:IsA("TextBox")) and obj.Visible then
+                        local value = tostring(obj.Text or "")
+                        if value ~= "" and obj:IsA("TextButton") and not seen[obj] then
+                            seen[obj] = true
+                            found[#found + 1] = {object = obj, text = value}
+                        end
+                    end
+                end
+            end
+        end
+        return found
+    end
+    local function clearResults()
+        for _, child in ipairs(results:GetChildren()) do
+            if child:IsA("TextButton") or child:IsA("TextLabel") then child:Destroy() end
+        end
+    end
+    local function refreshSearch()
+        clearResults()
+        local query = string.lower(searchBox.Text or "")
+        if query == "" then
+            local hint = Instance.new("TextLabel")
+            hint.Size = UDim2.new(1, -4, 0, 28)
+            hint.BackgroundTransparency = 1
+            hint.Font = Enum.Font.Gotham
+            hint.TextSize = 11
+            hint.TextColor3 = Color3.fromRGB(195, 182, 215)
+            hint.Text = "输入关键词后，点击结果定位到对应控件"
+            hint.Parent = results
+            results.CanvasSize = UDim2.new(0, 0, 0, 32)
+            return
+        end
+        local count = 0
+        for _, item in ipairs(collectTextControls()) do
+            if string.find(string.lower(item.text), query, 1, true) then
+                count += 1
+                if count > 25 then break end
+                local result = Instance.new("TextButton")
+                result.LayoutOrder = count
+                result.Size = UDim2.new(1, -4, 0, 28)
+                result.BackgroundColor3 = Color3.fromRGB(70, 53, 94)
+                result.BackgroundTransparency = 0.1
+                result.BorderSizePixel = 0
+                result.Font = Enum.Font.Gotham
+                result.TextSize = 11
+                result.TextColor3 = Color3.fromRGB(245, 238, 255)
+                result.TextXAlignment = Enum.TextXAlignment.Left
+                result.Text = "  " .. string.sub(item.text, 1, 52)
+                result.Parent = results
+                Instance.new("UICorner", result).CornerRadius = UDim.new(0, 7)
+                result.Activated:Connect(function()
+                    local target = item.object
+                    if target and target.Parent then
+                        status.Text = "状态：已定位「" .. string.sub(item.text, 1, 20) .. "」"
+                        local oldColor = target.BackgroundColor3
+                        pcall(function() target.BackgroundColor3 = Color3.fromRGB(145, 98, 220) end)
+                        task.delay(0.8, function() pcall(function() if target and target.Parent then target.BackgroundColor3 = oldColor end end) end)
+                        pcall(function()
+                            local current = target
+                            while current and current ~= coreGui and current ~= playerGui do
+                                if current:IsA("ScrollingFrame") then
+                                    local absY = target.AbsolutePosition.Y - current.AbsolutePosition.Y + current.CanvasPosition.Y
+                                    current.CanvasPosition = Vector2.new(current.CanvasPosition.X, math.max(0, absY - 50))
+                                    break
+                                end
+                                current = current.Parent
+                            end
+                        end)
+                    end
+                end)
+            end
+        end
+        if count == 0 then
+            local empty = Instance.new("TextLabel")
+            empty.Size = UDim2.new(1, -4, 0, 28)
+            empty.BackgroundTransparency = 1
+            empty.Font = Enum.Font.Gotham
+            empty.TextSize = 11
+            empty.TextColor3 = Color3.fromRGB(220, 190, 190)
+            empty.Text = "没有找到匹配功能"
+            empty.Parent = results
+            count = 1
+        end
+        results.CanvasSize = UDim2.new(0, 0, 0, count * 32)
+    end
+    searchButton.Activated:Connect(function()
+        searchPanel.Visible = not searchPanel.Visible
+        if searchPanel.Visible then refreshSearch() end
+        panel.Size = searchPanel.Visible and UDim2.new(0, 300, 0, 258) or UDim2.new(0, 300, 0, 56)
+        searchButton.Text = searchPanel.Visible and "收起" or "搜索"
+    end)
+    searchBox:GetPropertyChangedSignal("Text"):Connect(refreshSearch)
+
+    local hidden = false
+    hideButton.Activated:Connect(function()
+        hidden = not hidden
+        for _, targetGui in ipairs(mainGuis) do
+            if targetGui and targetGui.Parent then
+                pcall(function() targetGui.Enabled = not hidden end)
+            end
+        end
+        hideButton.Text = hidden and "显示" or "隐藏"
+        status.Text = hidden and "状态：主界面已隐藏" or "状态：主界面已显示"
+        searchButton.Visible = not hidden
+        if hidden then searchPanel.Visible = false; panel.Size = UDim2.new(0, 300, 0, 56) end
+    end)
+
+    -- 点击原界面按钮时，显示最近操作；这是 UI 交互提示，不代表服务器操作一定成功。
+    for _, targetGui in ipairs(mainGuis) do
+        if targetGui and targetGui.Parent then
+            for _, obj in ipairs(targetGui:GetDescendants()) do
+                if obj:IsA("TextButton") then
+                    obj.Activated:Connect(function()
+                        if status and status.Parent then
+                            status.Text = "状态：已点击「" .. string.sub(tostring(obj.Text or "控件"), 1, 22) .. "」"
+                        end
+                    end)
+                end
+            end
+        end
+    end
+
+    -- 支持鼠标与触摸拖动，拖动区域为面板空白/标题区域。
+    local dragging, dragInput, dragStart, startPos = false, nil, nil, nil
+    panel.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            local x = input.Position.X - panel.AbsolutePosition.X
+            if x < 180 then
+                dragging = true
+                dragStart = input.Position
+                startPos = panel.Position
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then dragging = false end
+                end)
+            end
+        end
+    end)
+    panel.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input == dragInput or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            panel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    refreshSearch()
 end)
