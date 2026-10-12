@@ -894,6 +894,7 @@ local function getLocalImageAsset(fileName, fallback)
     if ok and asset then return asset end
     return fallback
 end
+local XingYuanLogoImage = getLocalImageAsset("XingYuanLogo.png", "aperture")
 local XingYuanAuthorImage = getLocalImageAsset("XingYuanAuthor.png", "rbxassetid://109219709724036")
 
 -- ========== 创建窗口 ==========
@@ -908,7 +909,7 @@ local windowHeight = mobileLayout and math.max(360, math.min(560, viewportSize.Y
 
 local Window = WindUI:CreateWindow({
     Title = "小秋 99 夜 | XingYuan",
-    Icon = "aperture",
+    Icon = XingYuanLogoImage,
     Author = "XingYuan 工作室",
     Folder = "XingYuan Hub",
     Size = UDim2.fromOffset(windowWidth, windowHeight),
@@ -972,7 +973,7 @@ end)
 -- 美化：打开按钮渐变（紫 → 青）
 Window:EditOpenButton({
     Title = "小秋 99 夜",
-    Icon = "aperture",
+    Icon = XingYuanLogoImage,
     CornerRadius = UDim.new(0, 10),
     StrokeThickness = 2,
     Color = ColorSequence.new(Color3.fromRGB(139, 92, 246), Color3.fromRGB(34, 211, 238)),
@@ -2120,37 +2121,28 @@ if not ui then ui = {} end
 if not ui.Creator then ui.Creator = {} end
 
 ui.Creator.Request = function(requestData)
-    local HttpService = game:GetService("HttpService")
-
-    local success, result = pcall(function()
-        if HttpService.RequestAsync then
-            local response = HttpService:RequestAsync({
-                Url = requestData.Url,
-                Method = requestData.Method or "GET",
-                Headers = requestData.Headers or {}
-            })
-            return {
-                Body = response.Body,
-                StatusCode = response.StatusCode,
-                Success = response.Success
-            }
-        else
-            local body = HttpService:GetAsync(requestData.Url)
-            return {
-                Body = body,
-                StatusCode = 200,
-                Success = true
-            }
+    -- 优先使用执行器提供的 HTTP 请求接口；普通 Roblox HttpService 可能没有开放外部请求权限。
+    local req = (syn and syn.request) or http_request or request or (http and http.request)
+    if req then
+        local response = req({
+            Url = requestData.Url,
+            Method = requestData.Method or "GET",
+            Headers = requestData.Headers or { ["Accept"] = "application/json" }
+        })
+        if response and (response.StatusCode == nil or (response.StatusCode >= 200 and response.StatusCode < 300)) then
+            return { Body = response.Body or response.body or "", StatusCode = response.StatusCode or 200, Success = true }
         end
-    end)
-
-    if success then
-        return result
-    else
-        error("HTTP Request failed: " .. tostring(result))
+        error("HTTP 状态码：" .. tostring(response and response.StatusCode or "请求失败"))
     end
+    local HttpService = game:GetService("HttpService")
+    local response = HttpService:RequestAsync({
+        Url = requestData.Url,
+        Method = requestData.Method or "GET",
+        Headers = requestData.Headers or { ["Accept"] = "application/json" }
+    })
+    if not response.Success then error("HTTP 状态码：" .. tostring(response.StatusCode)) end
+    return { Body = response.Body, StatusCode = response.StatusCode, Success = response.Success }
 end
-
 local InviteCode = "SRn6Mbe2"
 local DiscordAPI = "https://discord.com/api/v10/invites/" .. InviteCode .. "?with_counts=true"
 local DiscordStatus
@@ -2170,8 +2162,8 @@ local function LoadDiscordInfo()
     if success and result and result.guild then
         local DiscordInfo = Info:Paragraph({
             Title = result.guild.name,
-            Desc = ' <font color="#71717a">●</font> 成员数量 : ' .. tostring(result.approximate_member_count) ..
-                '\n <font color="#22c55e">●</font> 在线数量 : ' .. tostring(result.approximate_presence_count),
+            Desc = ' <font color="#71717a">●</font> 成员数量 : ' .. tostring(result.approximate_member_count or "未知") ..
+                '\n <font color="#22c55e">●</font> 在线数量 : ' .. tostring(result.approximate_presence_count or "暂不可用"),
             Image = "https://cdn.discordapp.com/icons/" .. result.guild.id .. "/" .. result.guild.icon .. ".png?size=1024",
             ImageSize = 42,
         })
@@ -2188,8 +2180,8 @@ local function LoadDiscordInfo()
 
                 if updated and updatedResult and updatedResult.guild then
                     DiscordInfo:SetDesc(
-                        ' <font color="#71717a">●</font> 成员数量 : ' .. tostring(updatedResult.approximate_member_count) ..
-                        '\n <font color="#22c55e">●</font> 在线数量 : ' .. tostring(updatedResult.approximate_presence_count)
+                        ' <font color="#71717a">●</font> 成员数量 : ' .. tostring(updatedResult.approximate_member_count or "未知") ..
+                        '\n <font color="#22c55e">●</font> 在线数量 : ' .. tostring(updatedResult.approximate_presence_count or "暂不可用")
                     )
 
                     WindUI:Notify({
