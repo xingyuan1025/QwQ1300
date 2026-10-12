@@ -884,26 +884,38 @@ local function bringItemsByPlayerTP(itemNames, originalPosition)
     hrp.CFrame = CFrame.new(originalPosition)
 end
 
+-- 自定义图片资源（将 XingYuanLogo.png 与 XingYuanAuthor.png 放入执行器的 workspace 或可访问目录）
+local function getLocalImageAsset(fileName, fallback)
+    local ok, asset = pcall(function()
+        if getcustomasset then return getcustomasset(fileName) end
+        if getsynasset then return getsynasset(fileName) end
+        error("当前执行环境不支持本地图片资源")
+    end)
+    if ok and asset then return asset end
+    return fallback
+end
+local XingYuanAuthorImage = getLocalImageAsset("XingYuanAuthor.png", "rbxassetid://109219709724036")
+
 -- ========== 创建窗口 ==========
 local viewportSize = Vector2.new(900, 650)
 pcall(function()
     local camera = Workspace.CurrentCamera
     if camera then viewportSize = camera.ViewportSize end
 end)
-local mobileLayout = viewportSize.X < 900 or viewportSize.Y < 500
-local windowWidth = mobileLayout and math.max(300, math.min(520, viewportSize.X * 0.62)) or 760
-local windowHeight = mobileLayout and math.max(240, math.min(420, viewportSize.Y * 0.78)) or 500
+local mobileLayout = viewportSize.X < 700
+local windowWidth = mobileLayout and math.max(300, math.min(440, viewportSize.X - 24)) or 760
+local windowHeight = mobileLayout and math.max(360, math.min(560, viewportSize.Y - 60)) or 500
 
 local Window = WindUI:CreateWindow({
     Title = "小秋 99 夜 | XingYuan",
-    Icon = "moon",
+    Icon = "aperture",
     Author = "XingYuan 工作室",
     Folder = "XingYuan Hub",
     Size = UDim2.fromOffset(windowWidth, windowHeight),
     Transparent = true,
     Theme = "GlassPurple",
     Resizable = true,
-    SideBarWidth = mobileLayout and 120 or 150,
+    SideBarWidth = 150,
     BackgroundImageTransparency = 0.8,
     HideSearchBar = false,
     ScrollBarEnabled = true,
@@ -960,7 +972,7 @@ end)
 -- 美化：打开按钮渐变（紫 → 青）
 Window:EditOpenButton({
     Title = "小秋 99 夜",
-    Icon = "moon",
+    Icon = "aperture",
     CornerRadius = UDim.new(0, 10),
     StrokeThickness = 2,
     Color = ColorSequence.new(Color3.fromRGB(139, 92, 246), Color3.fromRGB(34, 211, 238)),
@@ -969,17 +981,17 @@ Window:EditOpenButton({
 
 local Tabs = {}
 
-Tabs.Combat = Window:Tab({ Title = "战斗", Icon = "sword", Desc = "XingYuan" })
+Tabs.Info = Window:Tab({ Title = "关于", Icon = "badge-info", Desc = "XingYuan" })
 Tabs.Main = Window:Tab({ Title = "主页", Icon = "align-left", Desc = "XingYuan" })
+Tabs.Combat = Window:Tab({ Title = "战斗", Icon = "sword", Desc = "XingYuan" })
 Tabs.Auto = Window:Tab({ Title = "自动", Icon = "wrench", Desc = "XingYuan" })
 Tabs.esp = Window:Tab({ Title = "透视", Icon = "sparkles", Desc = "XingYuan" })
 Tabs.br = Window:Tab({ Title = "拾取", Icon = "package", Desc = "XingYuan" })
 Tabs.Tp = Window:Tab({ Title = "传送", Icon = "map", Desc = "XingYuan" })
 Tabs.Fly = Window:Tab({ Title = "玩家", Icon = "user", Desc = "XingYuan" })
 Tabs.Vision = Window:Tab({ Title = "环境", Icon = "eye", Desc = "XingYuan" })
-Tabs.Info = Window:Tab({ Title = "关于", Icon = "badge-info", Desc = "XingYuan" })
 
-Window:SelectTab(2)
+Window:SelectTab(1)
 pcall(function()
     WindUI:Notify({
         Title = "小秋 99 夜",
@@ -1034,7 +1046,6 @@ Tabs.Combat:Slider({
 Tabs.Main:Section({ Title = "自动进食", Icon = "utensils" })
 
 Tabs.Main:Dropdown({
-    MenuWidth = 200,
     Title = "选择食物",
     Desc = "勾选需要的食物",
     Values = toCNList(alimentos),
@@ -1165,7 +1176,6 @@ Tabs.Main:Toggle({
 Tabs.Auto:Section({ Title = "自动升级营火", Icon = "flame" })
 
 Tabs.Auto:Dropdown({
-    MenuWidth = 200,
     Title = "选择燃料",
     Desc = "选择要添加的燃料",
     Values = toCNList(campfireFuelItems),
@@ -1201,7 +1211,6 @@ Tabs.Auto:Toggle({
 Tabs.Auto:Section({ Title = "自动分解物品", Icon = "cog" })
 
 Tabs.Auto:Dropdown({
-    MenuWidth = 200,
     Title = "选择分解物",
     Desc = "选择要分解的物品",
     Values = toCNList(scrapjunkItems),
@@ -1237,7 +1246,6 @@ Tabs.Auto:Toggle({
 Tabs.Auto:Section({ Title = "自动烹饪食物", Icon = "flame" })
 
 Tabs.Auto:Dropdown({
-    MenuWidth = 200,
     Title = "选择食材",
     Values = toCNList(autocookItems),
     Multi = true,
@@ -1297,7 +1305,6 @@ Tabs.Tp:Button({
 Tabs.Tp:Section({ Title = "走失儿童", Icon = "eye" })
 
 local MobDropdown = Tabs.Tp:Dropdown({
-    MenuWidth = 200,
     Title = "选择儿童",
     Values = currentMobNames,
     Multi = false,
@@ -1349,7 +1356,6 @@ Tabs.Tp:Button({
 Tabs.Tp:Section({ Title = "宝箱", Icon = "box" })
 
 local ChestDropdown = Tabs.Tp:Dropdown({
-    MenuWidth = 200,
     Title = "选择宝箱",
     Values = currentChestNames,
     Multi = false,
@@ -1404,7 +1410,6 @@ Tabs.Tp:Button({
 Tabs.br:Section({ Title = "杂物", Icon = "box" })
 
 Tabs.br:Dropdown({
-    MenuWidth = 200,
     Title = "选择杂物",
     Desc = "勾选要拾取的物品",
     Values = toCNList(junkItems),
@@ -1451,7 +1456,6 @@ Tabs.br:Toggle({
 Tabs.br:Section({ Title = "燃料", Icon = "flame" })
 
 Tabs.br:Dropdown({
-    MenuWidth = 200,
     Title = "选择燃料",
     Desc = "勾选要拾取的物品",
     Values = toCNList(fuelItems),
@@ -1498,7 +1502,6 @@ Tabs.br:Toggle({
 Tabs.br:Section({ Title = "食物", Icon = "utensils" })
 
 Tabs.br:Dropdown({
-    MenuWidth = 200,
     Title = "选择食物",
     Desc = "勾选要拾取的物品",
     Values = toCNList(foodItems),
@@ -1545,7 +1548,6 @@ Tabs.br:Toggle({
 Tabs.br:Section({ Title = "医疗用品", Icon = "bandage" })
 
 Tabs.br:Dropdown({
-    MenuWidth = 200,
     Title = "选择医疗品",
     Desc = "勾选要拾取的物品",
     Values = toCNList(medicalItems),
@@ -1592,7 +1594,6 @@ Tabs.br:Toggle({
 Tabs.br:Section({ Title = "装备", Icon = "sword" })
 
 Tabs.br:Dropdown({
-    MenuWidth = 200,
     Title = "选择装备",
     Desc = "勾选要拾取的物品",
     Values = toCNList(equipmentItems),
@@ -1839,7 +1840,6 @@ local espConnections = {}
 Tabs.esp:Section({ Title = "物品透视", Icon = "package" })
 
 Tabs.esp:Dropdown({
-    MenuWidth = 200,
     Title = "选择物品",
     Values = ieCN,
     Value = {},
@@ -1902,7 +1902,6 @@ Tabs.esp:Toggle({
 Tabs.esp:Section({ Title = "生物透视", Icon = "user" })
 
 Tabs.esp:Dropdown({
-    MenuWidth = 200,
     Title = "选择生物",
     Values = meCN,
     Value = {},
@@ -2120,97 +2119,132 @@ Info = Tabs["Info"]
 if not ui then ui = {} end
 if not ui.Creator then ui.Creator = {} end
 
-local DISCORD_LINK = "https://discord.gg/SRn6Mbe2"
+ui.Creator.Request = function(requestData)
+    local HttpService = game:GetService("HttpService")
+
+    local success, result = pcall(function()
+        if HttpService.RequestAsync then
+            local response = HttpService:RequestAsync({
+                Url = requestData.Url,
+                Method = requestData.Method or "GET",
+                Headers = requestData.Headers or {}
+            })
+            return {
+                Body = response.Body,
+                StatusCode = response.StatusCode,
+                Success = response.Success
+            }
+        else
+            local body = HttpService:GetAsync(requestData.Url)
+            return {
+                Body = body,
+                StatusCode = 200,
+                Success = true
+            }
+        end
+    end)
+
+    if success then
+        return result
+    else
+        error("HTTP Request failed: " .. tostring(result))
+    end
+end
+
 local InviteCode = "SRn6Mbe2"
 local DiscordAPI = "https://discord.com/api/v10/invites/" .. InviteCode .. "?with_counts=true"
-
--- 多通道请求：优先用执行器自带请求函数（客户端 HttpService 访问外网会被 Roblox 拦截，这是原来失败的主要原因）
-local function fetchDiscordJson()
-    local HttpService = game:GetService("HttpService")
-    local reqFn = (syn and syn.request) or (http and http.request) or http_request or request
-        or (fluxus and fluxus.request) or (krnl and krnl.request)
-
-    local attempts = {}
-    if reqFn then
-        table.insert(attempts, function()
-            local res = reqFn({
-                Url = DiscordAPI,
-                Method = "GET",
-                Headers = { ["Accept"] = "application/json", ["User-Agent"] = "Mozilla/5.0" },
-            })
-            assert(res and (res.StatusCode == nil or res.StatusCode == 200), "HTTP " .. tostring(res and res.StatusCode))
-            return res.Body
-        end)
-    end
-    table.insert(attempts, function() return game:HttpGet(DiscordAPI) end)
-    table.insert(attempts, function() return HttpService:GetAsync(DiscordAPI) end)
-
-    local lastErr = "no method"
-    for _, attempt in ipairs(attempts) do
-        local ok, body = pcall(attempt)
-        if ok and type(body) == "string" and #body > 0 then
-            local okJson, data = pcall(function() return HttpService:JSONDecode(body) end)
-            if okJson and type(data) == "table" and data.guild then
-                return data
-            end
-            lastErr = "bad json"
-        else
-            lastErr = tostring(body)
-        end
-    end
-    return nil, lastErr
-end
-
-local function discordDesc(d)
-    return ' <font color="#71717a">●</font> 成员数量 : ' .. tostring(d.approximate_member_count or "?") ..
-        '\n <font color="#22c55e">●</font> 在线数量 : ' .. tostring(d.approximate_presence_count or "?")
-end
-
-local function copyDiscordLink()
-    local ok = pcall(function() setclipboard(DISCORD_LINK) end)
-    WindUI:Notify({
-        Title = ok and "已复制！" or "复制失败",
-        Content = ok and "Discord 邀请链接已复制到剪贴板" or ("当前执行器不支持复制，链接：" .. DISCORD_LINK),
-        Duration = ok and 2 or 6,
-        Icon = ok and "clipboard-check" or "alert-triangle",
-    })
-end
+local DiscordStatus
 
 local function LoadDiscordInfo()
-    local data, err = fetchDiscordJson()
+    local success, result = pcall(function()
+        return game:GetService("HttpService"):JSONDecode(ui.Creator.Request({
+            Url = DiscordAPI,
+            Method = "GET",
+            Headers = {
+                ["User-Agent"] = "RobloxBot/1.0",
+                ["Accept"] = "application/json"
+            }
+        }).Body)
+    end)
 
-    if data then
-        local paragraph = {
-            Title = data.guild.name or "Discord",
-            Desc = discordDesc(data),
-        }
-        if data.guild.icon then
-            paragraph.Image = "https://cdn.discordapp.com/icons/" .. data.guild.id .. "/" .. data.guild.icon .. ".png?size=256"
-            paragraph.ImageSize = 42
-        end
-        local DiscordInfo = Info:Paragraph(paragraph)
+    if success and result and result.guild then
+        local DiscordInfo = Info:Paragraph({
+            Title = result.guild.name,
+            Desc = ' <font color="#71717a">●</font> 成员数量 : ' .. tostring(result.approximate_member_count) ..
+                '\n <font color="#22c55e">●</font> 在线数量 : ' .. tostring(result.approximate_presence_count),
+            Image = "https://cdn.discordapp.com/icons/" .. result.guild.id .. "/" .. result.guild.icon .. ".png?size=1024",
+            ImageSize = 42,
+        })
 
         Info:Button({
             Title = "刷新信息",
             Callback = function()
-                local newData = fetchDiscordJson()
-                if newData then
-                    DiscordInfo:SetDesc(discordDesc(newData))
-                    WindUI:Notify({ Title = "Discord 信息已更新", Content = "数据刷新成功", Duration = 2, Icon = "refresh-cw" })
+                local updated, updatedResult = pcall(function()
+                    return game:GetService("HttpService"):JSONDecode(ui.Creator.Request({
+                        Url = DiscordAPI,
+                        Method = "GET",
+                    }).Body)
+                end)
+
+                if updated and updatedResult and updatedResult.guild then
+                    DiscordInfo:SetDesc(
+                        ' <font color="#71717a">●</font> 成员数量 : ' .. tostring(updatedResult.approximate_member_count) ..
+                        '\n <font color="#22c55e">●</font> 在线数量 : ' .. tostring(updatedResult.approximate_presence_count)
+                    )
+
+                    WindUI:Notify({
+                        Title = "Discord 信息已更新",
+                        Content = "Discord 数据刷新成功",
+                        Duration = 2,
+                        Icon = "refresh-cw",
+                    })
                 else
-                    WindUI:Notify({ Title = "更新失败", Content = "网络受限，暂时无法刷新", Duration = 3, Icon = "alert-triangle" })
+                    WindUI:Notify({
+                        Title = "更新失败",
+                        Content = "无法刷新 Discord 信息",
+                        Duration = 3,
+                        Icon = "alert-triangle",
+                    })
                 end
             end
         })
-    else
-        -- 拉取失败：不再显示红色报错，改为静态卡片，仍可复制链接
-        warn("[XingYuan Hub] Discord 信息获取失败: " .. tostring(err))
-    end
 
-    Info:Button({ Title = "复制邀请链接", Callback = copyDiscordLink })
+        Info:Button({
+            Title = "复制邀请链接",
+            Callback = function()
+                setclipboard("https://discord.gg/SRn6Mbe2")
+                WindUI:Notify({
+                    Title = "已复制！",
+                    Content = "Discord 邀请链接已复制到剪贴板",
+                    Duration = 2,
+                    Icon = "clipboard-check",
+                })
+            end
+        })
+    else
+        pcall(function()
+            DiscordStatus:SetDesc('<font color="#ef4444">●</font> 暂时无法获取在线人数；邀请链接仍可使用。请检查网络或稍后刷新。')
+        end)
+        Info:Button({
+            Title = "重试获取 Discord 状态",
+            Callback = function()
+                pcall(function() DiscordStatus:SetDesc('<font color="#f59e0b">●</font> 正在重新连接 Discord……') end)
+                task.spawn(LoadDiscordInfo)
+            end,
+        })
+        warn("[XingYuan Hub] Discord API 请求失败：", result)
+    end
 end
 
-task.spawn(LoadDiscordInfo)  -- 异步加载，不卡住界面
+-- Discord 状态卡放在 XingYuan Hub 标题上方；API 失败时保留邀请入口，不阻断整个 UI。
+DiscordStatus = Info:Paragraph({
+    Title = "Discord 服务器状态",
+    Desc = '<font color="#f59e0b">●</font> 正在获取服务器在线数据……',
+    Image = "rbxassetid://109219709724036",
+    ImageSize = 30,
+})
+
+LoadDiscordInfo()
 
 Info:Divider()
 Info:Section({
@@ -2223,8 +2257,8 @@ Info:Divider()
 local Owner = Info:Paragraph({
     Title = "主要作者",
     Desc = "XingYuan",
-    Image = "rbxassetid://109219709724036",
-    ImageSize = 30,
+    Image = XingYuanAuthorImage,
+    ImageSize = 42,
     Thumbnail = "",
     ThumbnailSize = 0,
     Locked = false,
@@ -2252,7 +2286,10 @@ local Discord = Info:Paragraph({
         {
             Icon = "copy",
             Title = "复制链接",
-            Callback = copyDiscordLink,
+            Callback = function()
+                setclipboard("https://discord.gg/SRn6Mbe2")
+                print("Copied discord link to clipboard!")
+            end,
         }
     }
 })
