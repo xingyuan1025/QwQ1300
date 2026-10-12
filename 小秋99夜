@@ -1,6 +1,27 @@
 -- XingYuan Hub | 99 Nights in Forest  【加入 QQ 群了解更多1026783447 https://qun.qq.com/universal-share/share?ac=1&authKey=pH8OiRLZKhRKGkB1x2khHAQBK6hj4vDa3nKDRtG%2FtsrO1n7bM67i8Hr9%2FL7uR%2FLE&busi_data=eyJncm91cENvZGUiOiIxMDI2NzgzNDQ3IiwidG9rZW4iOiI0TDJiclJqMVAvNm5MTkExTkNjYjNMK3Q5d2RMTE1vdUs1NVhqMkFSdzY4N0htaWZJSlU4RVRoaUZhQmlnQUIzIiwidWluIjoiNTQzMzI1NzA0In0%3D&data=FBrmhrp4PNsJMzzACNJNT3GaSMZ9xupbCUnBP4kE55paEG1vcUxJ8acxT9pZYX1-KMcf7LN8tC6zQ062vf46hg&svctype=4&tempid=h5_group_info】
 -- 仅用于 Roblox Studio 本地学习，请勿在在线服务器运行
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+-- UI 依赖启动检查：失败时输出清晰错误，避免只看到“即将加载”。
+local WindUI
+local uiLoadOK, uiLoadResult = pcall(function()
+    local source = game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua")
+    assert(type(source) == "string" and #source > 0, "WindUI 下载内容为空")
+    local chunk, compileErr = loadstring(source)
+    assert(type(chunk) == "function", "WindUI 编译失败: " .. tostring(compileErr))
+    return chunk()
+end)
+if uiLoadOK then
+    WindUI = uiLoadResult
+else
+    warn("[XingYuan Hub] WindUI 加载失败: " .. tostring(uiLoadResult))
+    pcall(function()
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "XingYuan Hub 加载失败",
+            Text = "UI 库无法加载，请查看执行器控制台。",
+            Duration = 8,
+        })
+    end)
+    error("[XingYuan Hub] 无法初始化 WindUI；请检查网络、远程源码和执行环境。")
+end
 
 -- Services
 local Players = game:GetService("Players")
@@ -127,10 +148,23 @@ WindUI:AddTheme({
     Icon = "#e9d5ff",
 })
 
+-- 新主题：深紫磨砂风格，降低高亮颜色的刺眼程度。
+WindUI:AddTheme({
+    Name = "GlassPurple",
+    Accent = "#a78bfa",
+    Dialog = "#211532",
+    Outline = "#8b5cf6",
+    Text = "#f5f3ff",
+    Placeholder = "#b6a7d6",
+    Background = "#100b1b",
+    Button = "#35234d",
+    Icon = "#c4b5fd",
+})
+
 WindUI:SetNotificationLower(true)
 
-local themes = {"Dark", "Light", "Gray", "Blue", "Green", "Purple"}
-local themeCN = {"深色", "浅色", "灰色", "蓝色", "绿色", "紫色"}
+local themes = {"GlassPurple", "Purple", "Dark", "Blue", "Green", "Gray", "Light"}
+local themeCN = {"磨砂紫", "紫色", "深色", "蓝色", "绿色", "灰色", "浅色"}
 local currentThemeIndex = 1
 
 if not getgenv().TransparencyEnabled then
@@ -851,14 +885,23 @@ local function bringItemsByPlayerTP(itemNames, originalPosition)
 end
 
 -- ========== 创建窗口 ==========
+local viewportSize = Vector2.new(900, 650)
+pcall(function()
+    local camera = Workspace.CurrentCamera
+    if camera then viewportSize = camera.ViewportSize end
+end)
+local mobileLayout = viewportSize.X < 700
+local windowWidth = mobileLayout and math.max(300, math.min(440, viewportSize.X - 24)) or 760
+local windowHeight = mobileLayout and math.max(360, math.min(560, viewportSize.Y - 60)) or 500
+
 local Window = WindUI:CreateWindow({
-    Title = "99 Nights in Forest | XingYuan Hub",
-    Icon = "zap",
-    Author = "XingYuan Scripts",
+    Title = "小秋 99 夜 | XingYuan",
+    Icon = "moon",
+    Author = "XingYuan 工作室",
     Folder = "XingYuan Hub",
-    Size = UDim2.fromOffset(520, 360),
-    Transparent = getgenv().TransparencyEnabled,
-    Theme = "Dark",
+    Size = UDim2.fromOffset(windowWidth, windowHeight),
+    Transparent = true,
+    Theme = "GlassPurple",
     Resizable = true,
     SideBarWidth = 150,
     BackgroundImageTransparency = 0.8,
@@ -916,8 +959,8 @@ end)
 
 -- 美化：打开按钮渐变（紫 → 青）
 Window:EditOpenButton({
-    Title = "菜单",
-    Icon = "zap",
+    Title = "小秋 99 夜",
+    Icon = "moon",
     CornerRadius = UDim.new(0, 10),
     StrokeThickness = 2,
     Color = ColorSequence.new(Color3.fromRGB(139, 92, 246), Color3.fromRGB(34, 211, 238)),
@@ -936,7 +979,15 @@ Tabs.Fly = Window:Tab({ Title = "玩家", Icon = "user", Desc = "XingYuan" })
 Tabs.Vision = Window:Tab({ Title = "环境", Icon = "eye", Desc = "XingYuan" })
 Tabs.Info = Window:Tab({ Title = "关于", Icon = "badge-info", Desc = "XingYuan" })
 
-Window:SelectTab(9)
+Window:SelectTab(2)
+pcall(function()
+    WindUI:Notify({
+        Title = "小秋 99 夜",
+        Content = "紫色磨砂 UI 已初始化",
+        Duration = 3,
+        Icon = "check-circle"
+    })
+end)
 
 -- ========== 战斗页 ==========
 Tabs.Combat:Section({ Title = "自动攻击", Icon = "star" })
