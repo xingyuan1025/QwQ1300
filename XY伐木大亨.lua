@@ -32,9 +32,30 @@ end
 local pos = initialRoot and (initialRoot.CFrame + Vector3.new(0, 5, 0)) or CFrame.new()
 local ME = initialRoot
 local Mouse = gs("Players").LocalPlayer:GetMouse()
-local CurrentSlot = game.Players.LocalPlayer:WaitForChild("CurrentSaveSlot").Value
+-- 启动诊断：避免关键对象缺失时无限等待，导致只有通知、没有界面。
+local function xyStartupNotice(message)
+    warn("[XY 启动诊断] " .. tostring(message))
+    pcall(function()
+        gs("StarterGui"):SetCore("SendNotification", {
+            Title = "XY 启动诊断",
+            Text = tostring(message),
+            Duration = 8,
+        })
+    end)
+end
+
+local CurrentSaveSlotObject = lp:WaitForChild("CurrentSaveSlot", 25)
+if not CurrentSaveSlotObject then
+    xyStartupNotice("等待 CurrentSaveSlot 超时。请确认已进入游戏并加载存档；脚本已停止，避免卡死。")
+    return
+end
+local CurrentSlot = CurrentSaveSlotObject.Value
 local ScriptLoadOrSave = false
-local CurrentlySavingOrLoading = game.Players.LocalPlayer:WaitForChild("CurrentlySavingOrLoading")
+local CurrentlySavingOrLoading = lp:WaitForChild("CurrentlySavingOrLoading", 25)
+if not CurrentlySavingOrLoading then
+    xyStartupNotice("找不到 CurrentlySavingOrLoading，当前游戏版本可能与脚本不匹配。")
+    return
+end
 local mouse = game.Players.LocalPlayer:GetMouse()
 local bai = {
     axedupe = false,
@@ -1823,14 +1844,46 @@ end
 shuaxinlb(true)
 
 -- 在加载 UI 库前记录现有 ScreenGui，后续用于识别本脚本创建的主界面。
+xyStartupNotice("基础初始化完成，正在加载主界面……")
 local __xyGuiBaseline = {}
-for _, container in ipairs({game:GetService("CoreGui"), lp:WaitForChild("PlayerGui")}) do
+for _, container in ipairs({game:GetService("CoreGui"), lp:WaitForChild("PlayerGui", 15) or lp}) do
     for _, child in ipairs(container:GetChildren()) do
         if child:IsA("ScreenGui") then __xyGuiBaseline[child] = true end
     end
 end
 
-local library = loadstring(game:HttpGet("https://github.com/CloudX-ScriptsWane/baijiaobengv4beta/raw/main/silent%20ui.txt", true))()
+-- 远程 UI 库是原脚本启动的关键依赖；失败时明确提示，而不是静默中断。
+local UI_LIBRARY_URL = "https://github.com/CloudX-ScriptsWane/baijiaobengv4beta/raw/main/silent%20ui.txt"
+local libraryChunk, librarySource
+local fetchOK, fetchResult = pcall(function()
+    return game:HttpGet(UI_LIBRARY_URL, true)
+end)
+if fetchOK and type(fetchResult) == "string" and #fetchResult > 0 then
+    librarySource = fetchResult
+else
+    xyStartupNotice("无法下载 UI 库（网络/地址/执行环境限制）。请检查执行器输出；主界面未创建。")
+    error("[XY] UI 库下载失败: " .. tostring(fetchResult))
+end
+
+local compileOK, compileResult = pcall(function()
+    return loadstring(librarySource)
+end)
+if not compileOK or type(compileResult) ~= "function" then
+    xyStartupNotice("UI 库源码无法编译。远程文件可能已变更或返回了错误页面。")
+    error("[XY] UI 库编译失败: " .. tostring(compileResult))
+end
+libraryChunk = compileResult
+
+local libraryOK, libraryResult = pcall(libraryChunk)
+if not libraryOK or type(libraryResult) ~= "table" then
+    xyStartupNotice("UI 库初始化失败。请查看执行器控制台中的 [XY] 错误信息。")
+    error("[XY] UI 库初始化失败: " .. tostring(libraryResult))
+end
+local library = libraryResult
+if type(library.new) ~= "function" then
+    xyStartupNotice("UI 库接口不兼容：缺少 new 方法。")
+    error("[XY] UI 库接口不兼容")
+end
 local window = library:new("XY · 伐木大亨工具箱", "")
 -- 重新分组：保持原有 Section 变量名，尽量不影响后续功能回调。
 local Tab1 = window:Tab("玩家与传送", "10882439086")
